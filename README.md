@@ -168,3 +168,6 @@ forge test --mt testPriceFeedVersionIsAccurate --fork-url $SEPOLIA_RPC_URL
 ```
 forge test --fork-url $MAINNET_RPC_URL -vvv
 ```
+
+### Foundry tests cheatcodes
+
