@@ -163,4 +163,8 @@ This runs as anvil simulating sepolia.
 source .env
 forge test --mt testPriceFeedVersionIsAccurate --fork-url $SEPOLIA_RPC_URL
 ```
+#### Deploy a mock priceFeed
 
+```
+forge test --fork-url $MAINNET_RPC_URL -vvv
+```

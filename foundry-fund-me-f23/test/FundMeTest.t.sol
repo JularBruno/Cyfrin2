@@ -42,7 +42,8 @@ contract FundMeTest is Test {
 
     function testOwnerIsMsgSender() public view {
         // assertEq(fundMe.i_owner(), msg.sender); // this wrong because contract is deployed on setup
-        assertEq(fundMe.i_owner(), address(this));
+        // assertEq(fundMe.i_owner(), address(this)); // removed this since updated Script on refactor
+        assertEq(fundMe.i_owner(), msg.sender);
     }
 
 
