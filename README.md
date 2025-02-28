@@ -125,3 +125,42 @@ Most projects today prefer deploying to *Layer 2* solutions rather than directly
 
 Think of *Alchemy* as the AWS of Web3.
 - The platform's primary component is the _Supernode_, a proprietary blockchain engine that works as a load balancer on top of your node.
+
+# Section 2: Foundry Fund me
+
+### Writing tests for your Solidity smart contract
+
+`forge test` has an option called verbosity. By controlling this option we decide how verbose should the output of the `forge test` be.
+```
+forge test -vv
+```
+
+### Running tests on chains forks
+
+This course will cover 4 different types of tests:
+
+* **Unit tests**: Focus on isolating and testing individual smart contract functions or functionalities.
+* **Integration tests**: Verify how a smart contract interacts with other contracts or external systems.
+* **Forking tests**: Forking refers to creating a copy of a blockchain state at a specific point in time. This copy, called a fork, is then used to run tests in a simulated environment.
+* **Staging tests**: Execute tests against a deployed smart contract on a staging environment before mainnet deployment.
+
+Coming back to our contracts, the central functionality of our protocol is the `fund` function.
+So for price checking we want to see if we can get conversion rate. Firstly checking AggV3 version
+
+
+This are unit and integration, tests.
+
+```
+forge test --mt testPriceFeedVersionIsAccurate
+```
+
+This above fails, need to fork. Created .env with alchemy SEPOLIA_RPC_URL
+We can add `-vvv` to see stack trace.
+
+This runs as anvil simulating sepolia. 
+
+```
+source .env
+forge test --mt testPriceFeedVersionIsAccurate --fork-url $SEPOLIA_RPC_URL
+```
+
