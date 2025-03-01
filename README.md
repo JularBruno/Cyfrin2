@@ -169,5 +169,15 @@ forge test --mt testPriceFeedVersionIsAccurate --fork-url $SEPOLIA_RPC_URL
 forge test --fork-url $MAINNET_RPC_URL -vvv
 ```
 
-### Foundry tests cheatcodes
+#### Introduction to Foundry Chisel
+To test small code just run `chisel`
 
+### Calculate Withdraw gas costs
+
+```
+forge snapshot --mt testWithDrawFromMultipleFunder -vvv
+```
+
+.gas-snapshot is creted and says how many gas is a test gona cost
+
+Anvil default gas price is 0!

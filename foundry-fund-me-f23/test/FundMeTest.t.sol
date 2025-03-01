@@ -17,6 +17,7 @@ contract FundMeTest is Test {
     
     uint256 constant SEND_VALUE = 0.1 ether;
     uint256 constant STARTING_BALANCE = 10 ether;
+    uint256 constant GAS_PRICE = 1;
 
     FundMe fundMe;
 
@@ -139,9 +140,19 @@ contract FundMeTest is Test {
 
         // Act
 
+        // uint256 gasStart = gasleft(); // gasLeft solidity
+        // vm.txGasPrice(GAS_PRICE);
+
         // vm.prank(fundMe.getOwner());
+
         vm.startPrank(fundMe.getOwner());
         fundMe.withdraw();
+
+        // uint256 gasEnd = gasleft();
+        // uint256 gasUsed = (gasStart - gasEnd) * tx.gasprice; // tx: also built in solidity for transacton
+
+        // console.log(gasUsed);
+
         vm.stopPrank();
 
         // Assert
