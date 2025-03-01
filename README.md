@@ -181,3 +181,30 @@ forge snapshot --mt testWithDrawFromMultipleFunder -vvv
 .gas-snapshot is creted and says how many gas is a test gona cost
 
 Anvil default gas price is 0!
+
+
+## Introduction to Storage optimization
+
+First method for optimization, Storage.
+
+Storage: giant array of variables created. 
+- Each slot is 32 bytes long.
+- Dynamic elements, like array of mapping, these use a hashing function. An array just stores its length, and when you push this occupies a place in stroage being a hashing function. 
+- Constant variables don't use space in storage because this are in the bytecode of the contract. Is just like a pinter to the value.
+- Variables inside function are not in storage either, these are deleted after the function closes.
+- We use memory when using strings, strings are technically an array.
+- Solidity wants to know where to store the variable, storage or memory, needs to know where to allocate space.
+
+check DeployStorageFun.s.sol to play with storage spots
+
+```
+forge inspect FundMe storageLayout
+```
+- Constant and immutable are part of the contract bytecode
+
+
+```
+cast storage contractId 2
+```
+Prints what is at storage index 2
+
