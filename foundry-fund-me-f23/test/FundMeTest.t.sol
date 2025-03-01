@@ -122,7 +122,7 @@ contract FundMeTest is Test {
 
     }
 
-    function testWithDrawFromMultipleFunder() public funded {
+    function testWithDrawFromMultipleFunders() public funded {
         // Arrange
         uint160 numberOfFunders = 10; // uint160 same bytes as an address
         uint160 startingFunderIndex = 1; // dont send 0 address!!
@@ -158,8 +158,31 @@ contract FundMeTest is Test {
         // Assert
         assertEq(address(fundMe).balance, 0);
         assertEq(startingFundMeBalance + startingOwnerBalance, fundMe.getOwner().balance);
-
     
+    }
+
+
+    function testWithDrawFromMultipleFundersCheaper() public funded {
+        // Arrange
+        uint160 numberOfFunders = 10;
+        uint160 startingFunderIndex = 1;
+
+        for (uint160 i = startingFunderIndex; i < numberOfFunders; i++) {
+            hoax(address(i), SEND_VALUE);
+            fundMe.fund{value: SEND_VALUE}();
+        }
+
+        uint256 startingOwnerBalance = fundMe.getOwner().balance;
+        uint256 startingFundMeBalance = address(fundMe).balance;
+
+        // Act
+        vm.startPrank(fundMe.getOwner());
+        fundMe.cheaperWithdraw(); // only difference
+        vm.stopPrank();
+
+        // Assert
+        assertEq(address(fundMe).balance, 0);
+        assertEq(startingFundMeBalance + startingOwnerBalance, fundMe.getOwner().balance);
     }
 
 

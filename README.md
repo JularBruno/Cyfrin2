@@ -208,3 +208,18 @@ cast storage contractId 2
 ```
 Prints what is at storage index 2
 
+### Optimise the withdraw function gas costs
+`object` contract in pure bytecode
+`opcodes` low level codes for computing in low level assembly, each one has specific gas codes
+
+evm.codes
+- `sload store` is very expensive, everytime you read from storage it spends a minimum of 100gas
+- `mload and mstore` read and write to memory only cost 3 gas
+
+this retrieves the difference
+```
+forge snapshot
+```
+take in consideration styles: i_ immutable, s_ storage, uppercase for constants
+
+read style guide on soliditylang
