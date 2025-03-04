@@ -278,3 +278,25 @@ contract ZkSyncDevOps is Test, ZkSyncChainChecker, FoundryZkSyncChecker {
 
 
 # Section 3: Foundry me Frontend
+
+https://github.com/Cyfrin/html-fund-me-cu
+
+A beginner's guide to interacting with a website using your MetaMask wallet. The lesson covers the importance of understanding how your wallet interacts with websites, especially when sending transactions.
+
+#### How Metamask interacts with dapps
+
+Install live server extension or open index.html on the browser, this is for interacting with the MetaMask.
+Had to install live server because of cors.
+
+- use `make anvil` otherwise it wont work!
+- window.ethereum: this comes with metamask, even has wallet selected data. Read metamask docs.
+- use connect button to connect wallet
+- constants has contractAddress hardcoded in
+- this has ethers pacakge to interact with metamask and contracts
+    -  throws request via rpc url in metamask environmet
+- make deploy
+    - contract FundMe contract <address>
+- Setup metamask with anvil rpc url, also set up acocunt of anvil
+- abi constants: functions that can be called from contract
+- private key is always on metamask!
+
