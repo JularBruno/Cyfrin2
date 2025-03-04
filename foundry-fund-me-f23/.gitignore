@@ -16,3 +16,6 @@ docs/
 # sksync ignore
 .DS_Store
 zkout/
+
+broadcast/
+lib/

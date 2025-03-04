@@ -223,3 +223,58 @@ forge snapshot
 take in consideration styles: i_ immutable, s_ storage, uppercase for constants
 
 read style guide on soliditylang
+
+#### Create integration tests
+```
+forge install Cyfrin/foundry-devops --no-commit
+```
+
+`ffi = true` foundry code into machine
+
+for calling fund
+```
+forge script script/Interactions.s.sol FundFundMe --rpc-url --private-key
+```
+we did the tests for this
+
+### Automate your smart contracts actions - Makefile
+
+- ETHERSCAN_API_KEY: Went through etherscan.io process to get an api key, pasted it in ENV, maybe can use cast wallet for best practices.
+- PRIVATE_KEY: Private key from metamask! Thats why we use env
+
+Had some issues, when random error run with `--force` a deploy then run again the.
+
+```
+make deploy-sepolia
+```
+
+Had an error verifying the contract, don't really car now.
+
+#### ZkSync Devops
+
+```
+make remove
+make install
+
+forge test --mt testZkSyncChainFails -vvv
+
+foundryup-zksync
+```
+
+- foundry-devops package has very important features!
+- zksynchainchecker: has functions or modifiers to use or skip test when --zksync
+
+```
+contract ZkSyncDevOps is Test, ZkSyncChainChecker, FoundryZkSyncChecker {
+    function testZkSyncChainFails() public skipZkSync { 
+```
+
+- skipZkSync is for skipping the test, zksync doesnt support so skip them
+- this for not havy many failed tests, or if test fails in some env, slip it
+
+- FoundryZkSyncChecker: tests can also fail because of foundry version thats why we can use this
+
+- onlyOnVanillaFoundy: only works on vanilla even when no specifying `--zksync` but with `foundryup-zksync` already doesnt support all vanilla foundry things
+
+
+# Section 3: Foundry me Frontend
