@@ -9,7 +9,6 @@ import {HelperConfig} from "../script/HelperConfig.s.sol";
 contract DeployFundMe is Script {
     // address mockPriceFeed = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;
 
-
     function run() external returns (FundMe) {
         HelperConfig helperConfig = new HelperConfig(); // before broadcast for not using gas, this is simulated
         address ethUsdPriceFeed = helperConfig.activeNetworkConfig(); // this can be a construct if many
