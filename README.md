@@ -276,14 +276,13 @@ contract ZkSyncDevOps is Test, ZkSyncChainChecker, FoundryZkSyncChecker {
 
 - onlyOnVanillaFoundy: only works on vanilla even when no specifying `--zksync` but with `foundryup-zksync` already doesnt support all vanilla foundry things
 
-
 # Section 3: Foundry me Frontend
 
 https://github.com/Cyfrin/html-fund-me-cu
 
 A beginner's guide to interacting with a website using your MetaMask wallet. The lesson covers the importance of understanding how your wallet interacts with websites, especially when sending transactions.
 
-#### How Metamask interacts with dapps
+### How Metamask interacts with dapps
 
 Install live server extension or open index.html on the browser, this is for interacting with the MetaMask.
 Had to install live server because of cors.
@@ -300,3 +299,12 @@ Had to install live server because of cors.
 - abi constants: functions that can be called from contract
 - private key is always on metamask!
 
+### Decoding Ethereum transactions
+
+- metamask actually calls function selector with function signature (hex) `cast sig "fund()"` on the rpc url
+- should be able to see hex of the transaction "fund"
+- constants have the functions names in the abi
+- can be used to check function in frontend is running the properone
+- if parameters hex bigger, for calling with params `cast call-decode "fund()" param`
+
+# Section 4: Smart Contract Lottery
