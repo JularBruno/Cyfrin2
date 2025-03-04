@@ -9,4 +9,4 @@
 	url = https://github.com/smartcontractkit/chainlink-brownie-contracts
 [submodule "foundry-fund-me-f23/lib/foundry-devops"]
 	path = foundry-fund-me-f23/lib/foundry-devops
-	url = https://github.com/Cyfrin/foundry-devops
+	url = https://github.com/cyfrin/foundry-devops
