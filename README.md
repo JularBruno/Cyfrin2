@@ -311,3 +311,17 @@ Had to install live server because of cors.
 
 #### Solidity style guide
 https://docs.soliditylang.org/en/latest/style-guide.html#order-of-layout
+
+### Smart contracts events
+
+Which data structures use to keep track of players? Arrays, mapping or
+Events:
+- Make migration and front end indexig easier
+- EVM -> logging: events emit logs -> datastructure for logs -> you can eth_getLogs -> events allow to log, special datastructure not for smart contracts -> tied to smart contract -> we want to listen events -> ideal for offchain infrastructure -> chainlink helps with this reading, and the graph does it for even bigger event data structure
+- event structure: event type ie uint256 has four paramenters
+    - indexed keyword: up to three topics, this are easier to search and query
+        - the non indexed ones are abi encoded
+- we need to emit event to log it `emit event(parameters)`
+- There are event transactions
+    - these have address, data and a few more
+    - non indexed events are gas cheaper

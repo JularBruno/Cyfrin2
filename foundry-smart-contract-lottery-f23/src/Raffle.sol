@@ -37,6 +37,10 @@ contract Raffle {
     error Raffle__SendMoreToEnterRaffle(); // to know where revert comes from, add contract name prefix with __
 
     uint256 private immutable i_entranceFee; 
+    address payable[] private s_players; // syntax for making an address array payable
+
+    /* Events */
+    event RaffleEntered(address indexed player);
 
     constructor(uint256 entranceFee) {
         i_entranceFee = entranceFee;
@@ -48,6 +52,13 @@ contract Raffle {
         if (msg.value < i_entranceFee) {
             revert Raffle__SendMoreToEnterRaffle(); // always defaul to this kind of ifs
         }
+
+        // keep track of all raffle players
+        // default for mapping for data structures, but we are using the array s_players
+        s_players.push(payable(msg.sender)); // again payable to push payable address
+        // have to emit event
+        emit RaffleEntered(msg.sender);
+        // 
     }
 
     function pickWinner() public {
