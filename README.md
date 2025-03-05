@@ -308,3 +308,4 @@ Had to install live server because of cors.
 - if parameters hex bigger, for calling with params `cast call-decode "fund()" param`
 
 # Section 4: Smart Contract Lottery
+
