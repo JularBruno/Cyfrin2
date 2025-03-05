@@ -309,3 +309,5 @@ Had to install live server because of cors.
 
 # Section 4: Smart Contract Lottery
 
+#### Solidity style guide
+https://docs.soliditylang.org/en/latest/style-guide.html#order-of-layout
