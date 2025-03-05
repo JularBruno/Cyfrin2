@@ -33,6 +33,9 @@ pragma solidity ^0.8.18;
  * @dev Implements Chainlink VRFv2.5
  */
 contract Raffle {
+    /* Errors */
+    error Raffle__SendMoreToEnterRaffle(); // to know where revert comes from, add contract name prefix with __
+
     uint256 private immutable i_entranceFee; 
 
     constructor(uint256 entranceFee) {
@@ -40,8 +43,11 @@ contract Raffle {
     }
 
     function enterRaffle() public payable {
-
-
+        // require(msg.value >= i_entranceFee, "Not enough eth") // this is not gas efficient because of string
+        // require(msg.value >= i_entranceFee, SendMoreToEnterRaffle()); // newer versions!! need special compiler, and les gass eficient because low level stuff
+        if (msg.value < i_entranceFee) {
+            revert Raffle__SendMoreToEnterRaffle(); // always defaul to this kind of ifs
+        }
     }
 
     function pickWinner() public {
