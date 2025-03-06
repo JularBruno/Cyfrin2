@@ -348,3 +348,6 @@ Events:
 
 ### Implementing Vrf Fulfil
 We are requesting to chainlink, inheriting the contract VRFConsumerBaseV2Plus, there is a contract already deployed that can be requested a random number.
+
+### The modulo operation
+- The mod function: divide and get the remainder 10/9 = 1.?

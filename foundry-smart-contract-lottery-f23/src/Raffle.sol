@@ -37,6 +37,7 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
 contract Raffle is VRFConsumerBaseV2Plus {
     /* Errors */
     error Raffle__SendMoreToEnterRaffle(); // to know where revert comes from, add contract name prefix with __
+    error Raffle__TransferFailed();
 
     uint256 private immutable i_entranceFee;
     // @dev interval between lottery rounds. Duration of lottery in seconds
@@ -50,6 +51,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
     uint16 private constant REQUEST_CONFIRMATIONS = 3;
     uint32 private immutable i_callbackGasLimit;
     uint16 private constant NUM_WORDS = 1;
+
+
+    address private s_recentWinner;
 
     /* Events */
     event RaffleEntered(address indexed player);
@@ -113,6 +117,14 @@ contract Raffle is VRFConsumerBaseV2Plus {
     // is virtual in contract, so we override it, is required. Is Internal the chainlink node will call rawFulfillRandomWords
     // what to do after getting random words
     function fulfillRandomWords(uint256, /* requestId */ uint256[] calldata randomWords) internal override {
+        // modular operator, used to pick the random number and modulate it by the amount of users
+        uint256 indexOfWinner = randomWords[0] % s_players.length;
+        address payable recentWinner = s_players[indexOfWinner];
+        s_recentWinner = recentWinner;
+        (bool success, ) = recentWinner.call{value: address(this).balance}(""); // pay the user all contract balance
+        if(!success) {
+            revert Raffle__TransferFailed();
+        }
 
     }
 
