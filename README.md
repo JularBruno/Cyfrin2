@@ -351,3 +351,30 @@ We are requesting to chainlink, inheriting the contract VRFConsumerBaseV2Plus, t
 
 ### The modulo operation
 - The mod function: divide and get the remainder 10/9 = 1.?
+
+### Implementing the lottery state - Enum
+Enum state
+
+### The CEI method - Checks, Effects, Interactions
+Sometimes called "FREI-PI" Function requirements, effects-interactions, protocol INVARIANTS
+Helps avoid reentrancies.
+
+CEI: Checks, effects, interactions pattern
+- Checks (requires, conditional) more gas efficient to revert early
+- Effect (internal contract state) 
+- Interactions (External Contract Interactions) 
+
+### Introduction to Chainlink Automation (or chainlink keepers)
+
+We are not automatically calling pickWinner yet.
+We are going to use chainlink automation.
+https://docs.chain.link/chainlink-automation/overview/getting-started
+https://docs.chain.link/chainlink-automation/guides/compatible-contracts
+
+- Before the contracts required a checkUpkeep and performUpkeep to make any cron job, now Chainlink automations are used for that
+- Chainlink needs a contract abi to create an automation
+- Then in chainlink select time based and use cron to 
+    - there are cron readeable translators
+    - set the cron ie 1 **** one minute
+    - select contract function
+- Setup automation or upkeep
