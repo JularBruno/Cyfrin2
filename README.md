@@ -311,6 +311,7 @@ Had to install live server because of cors.
 
 #### Solidity style guide
 https://docs.soliditylang.org/en/latest/style-guide.html#order-of-layout
+https://docs.soliditylang.org/en/latest/style-guide.html#order-of-functions
 
 ### Smart contracts events
 
@@ -325,3 +326,25 @@ Events:
 - There are event transactions
     - these have address, data and a few more
     - non indexed events are gas cheaper
+
+### Random numbers - Introduction to Chainlink VRF
+
+- https://docs.chain.link/vrf/v2-5/subscription/get-a-random-number
+- Create Chainlink subscription
+- So this chanilink video say too many things but I dont fully require them
+    - Basically setup vrf subscription but requires to validate contract using it
+    - There is a conf for random values, how to store them, and security behind it like really being random or knowing the result beforehand than the contract
+
+### Implement the Chainlink VRF
+
+- Docs 
+    - V2 Subscription Method: singular subscription contract, sending gas to each fund
+    - Direct funding methid: fund the contract, every time we deploy raffle we should pay
+- Two transactoin process, first request RNG then get RNG
+- Instal chainlink-brownie-contracts, remmember to change the foundy.toml to link @chainlink
+- We need to add inherited contract, and constructor
+- on the docs there are all the explanations to the _struct_ of the vrf
+- `forge fmt`
+
+### Implementing Vrf Fulfil
+We are requesting to chainlink, inheriting the contract VRFConsumerBaseV2Plus, there is a contract already deployed that can be requested a random number.
