@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.18;
+
+import {Script} from "forge-std/Script.sol";
+import {Raffle} from "../src/Raffle.sol";
+import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+
+abstract contract CodeConstants {
+    /* vrf mock values */
+    uint96 public MOCK_BASE_FEE = 0.25 ether; // flat amount of token you are willing to pay
+    uint96 public MOCK_GAS_PRICE_LINK = 1e9; // gas actually spent
+    int256 public MOCK_WEI_PER_UINT_LINK = 4e15; // link to eth price in wei for chainlink vrf
+
+    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 1115511;
+    uint256 public constant LOCAL_CHAIN_ID = 31337;
+}
+
+contract HelperConfig is CodeConstants, Script {
+    error HelperConfig__InvalidChainId();
+
+    struct NetworkConfig {
+        uint256 entranceFee;
+        uint256 interval;
+        address vrfCoordinator;
+        bytes32 keyHash;
+        bytes32 gasLane;
+        uint256 subscriptionId;
+        uint32 callbackGasLimit;
+    }
+    
+    NetworkConfig public localNetworkConfig;
+    mapping(uint256 chainId => NetworkConfig) public networkConfigs;
+    
+    constructor() {
+        networkConfigs[ETH_SEPOLIA_CHAIN_ID] = getSepoliaEthConfig();
+    }
+
+    function getConfigByChainId(uint256 chainId) public returns(NetworkConfig memory) {
+        if(networkConfigs[chainId].vrfCoordinator != address(0)) {
+            return networkConfigs[chainId];
+        } else if (chainId == LOCAL_CHAIN_ID) {
+            return getOrCreateAnvilEthConfig();
+        } else {
+            revert HelperConfig__InvalidChainId();
+        }
+    }
+
+    function getConfig() public returns(NetworkConfig memory) {
+        return getConfigByChainId(block.chainid);
+    }
+    
+    function getSepoliaEthConfig() public pure returns(NetworkConfig memory) {
+        return NetworkConfig({
+            entranceFee: 0.1 ether, // 1e16
+            interval: 30, // 30 seconds
+            vrfCoordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625,
+            keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
+            gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
+            subscriptionId: 0,
+            callbackGasLimit: 500000 // 500,000 gas
+        });
+    }
+
+    function getOrCreateAnvilEthConfig() public returns(NetworkConfig memory) { // not pure because of mocs
+        // check if active netowrk config
+        if(localNetworkConfig.vrfCoordinator != address(0)) {
+            return localNetworkConfig;
+        }
+
+        // deploy mocks and such
+        vm.startBroadcast();
+        VRFCoordinatorV2_5Mock vrfCoordinatorMock = 
+            new VRFCoordinatorV2_5Mock(MOCK_BASE_FEE, MOCK_GAS_PRICE_LINK, MOCK_WEI_PER_UINT_LINK);
+        
+        vm.stopBroadcast();
+
+        localNetworkConfig = NetworkConfig({
+            entranceFee: 0.1 ether,
+            interval: 30,
+            vrfCoordinator: address(vrfCoordinatorMock),
+            keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
+            gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c, // not really required
+            subscriptionId: 0, // might have to fix
+            callbackGasLimit: 500000 
+        });
+
+        return localNetworkConfig;
+    }
+}
