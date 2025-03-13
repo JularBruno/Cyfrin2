@@ -5,6 +5,7 @@ pragma solidity ^0.8.18;
 import {Script} from "forge-std/Script.sol";
 import {Raffle} from "../src/Raffle.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {LinkToken} from "test/mocks/LinkToken.sol";
 
 abstract contract CodeConstants {
     /* vrf mock values */
@@ -12,7 +13,7 @@ abstract contract CodeConstants {
     uint96 public MOCK_GAS_PRICE_LINK = 1e9; // gas actually spent
     int256 public MOCK_WEI_PER_UINT_LINK = 4e15; // link to eth price in wei for chainlink vrf
 
-    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 1115511;
+    uint256 public constant ETH_SEPOLIA_CHAIN_ID = 11155111;
     uint256 public constant LOCAL_CHAIN_ID = 31337;
 }
 
@@ -27,6 +28,7 @@ contract HelperConfig is CodeConstants, Script {
         bytes32 gasLane;
         uint256 subscriptionId;
         uint32 callbackGasLimit;
+        address link;
     }
     
     NetworkConfig public localNetworkConfig;
@@ -57,8 +59,9 @@ contract HelperConfig is CodeConstants, Script {
             vrfCoordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625,
             keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
-            subscriptionId: 0,
-            callbackGasLimit: 500000 // 500,000 gas
+            subscriptionId: 8624174687644442225599354666885700418255358039814492564654394905292199905732,
+            callbackGasLimit: 500000, // 500,000 gas
+            link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
         });
     }
 
@@ -72,9 +75,10 @@ contract HelperConfig is CodeConstants, Script {
         vm.startBroadcast();
         VRFCoordinatorV2_5Mock vrfCoordinatorMock = 
             new VRFCoordinatorV2_5Mock(MOCK_BASE_FEE, MOCK_GAS_PRICE_LINK, MOCK_WEI_PER_UINT_LINK);
-        
+        LinkToken linkToken = new LinkToken();
         vm.stopBroadcast();
 
+        // own fake link token!
         localNetworkConfig = NetworkConfig({
             entranceFee: 0.1 ether,
             interval: 30,
@@ -82,7 +86,8 @@ contract HelperConfig is CodeConstants, Script {
             keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c, // not really required
             subscriptionId: 0, // might have to fix
-            callbackGasLimit: 500000 
+            callbackGasLimit: 500000,
+            link: address(linkToken)
         });
 
         return localNetworkConfig;

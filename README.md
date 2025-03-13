@@ -378,3 +378,49 @@ https://docs.chain.link/chainlink-automation/guides/compatible-contracts
     - set the cron ie 1 **** one minute
     - select contract function
 - Setup automation or upkeep
+
+### Subscribing to events
+
+Very cool how he analized this error
+
+```
+Failing tests:
+Encountered 1 failing test in test/unit/RaffleTest.t.sol:RaffleTest
+[FAIL: InvalidConsumer(0, 0x90193C961A926261B756D1E5bb255e67ff9498A1)] testDontAllowPlayersWhileRaffleIsCalculating() (gas: 106811)
+```
+
+Raffle::performUpkeep()
+    │   ├─ [5388] VRFCoordinatorV2_5Mock::requestRandomWords()
+    │   │   └─ ← [Revert] InvalidConsumer(0, 0x90193C961A926261B756D1E5bb255e67ff9498A1)
+
+- Searched from revert into VRF Contract, found onlyValidConsumer -> consumer not added or sth
+    - Previous notes that where confusing about VRF Setup, now make sense
+    - You have to create a subscription and then add a consumer
+- We need to update deployment process
+- https://openchain.xyz/ signature database, hex data for name
+- `cast sig "createSubscription()"` 0xa21a23e4
+
+### Creating the subscription UI
+
+We basically followed the steps on https://vrf.chain.link/ to create a subscription, but instead of doing it on the ui we can make a script out of it like in Interactions.s.sol
+
+- create subscription, you will be seeing it on My Subscriptions. You have a subscription Id to copy
+- You need to fund the subscription, Sepolia is the net being used. Fund subscription button on subscription.
+    - [https://docs.chain.link/resources/link-token-contracts -> ](https://docs.chain.link/resources/link-token-contracts#sepolia-testnet)
+    - for local linktoken.sol 
+        - need to copy from https://github.com/Cyfrin/foundry-smart-contract-lottery-cu/blob/main/test/mocks/LinkToken.sol
+        - need to install solmate
+
+#### Fund subscription
+```
+source env 
+cast wallet
+
+forge script script/Interactions.s.sol:FundSubscription 
+--rpc-url $SEPOLIA_RPC_URL --account sepolia --broadcast
+```
+
+- or use --private-key
+- But we mocked everything to do it locally to test it.
+- Scripts are also required to be tested.
+- I just tested it locally
