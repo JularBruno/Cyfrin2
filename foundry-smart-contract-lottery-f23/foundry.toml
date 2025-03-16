@@ -9,3 +9,8 @@ remappings = [
     '@solmate=lib/solmate/src/'
     ]
 
+# this is ffi equivalent, this adds permisions   
+fs_permissions = [
+    { access = "read", path = "./broadcast" },
+    { access = "read", path = "./reports" },
+]
