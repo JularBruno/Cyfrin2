@@ -423,4 +423,4 @@ forge script script/Interactions.s.sol:FundSubscription
 - or use --private-key
 - But we mocked everything to do it locally to test it.
 - Scripts are also required to be tested.
-- I just tested it locally
+- I just tested it locally! 
