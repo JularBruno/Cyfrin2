@@ -104,10 +104,10 @@ contract Raffle is VRFConsumerBaseV2Plus {
     }
 
     /**
-     * @dev This is the fucntoin that the CHainlink nodes will call to see
+     * @dev This is the functoin that the CHainlink nodes will call to see
      * if the lottery is ready to have a winner picked.
      * The following should be true in order for upkeepNeeded to be true:
-     * 1. Time interval has paessed
+     * 1. Time interval has passed
      * 2. The lottery is open
      * 3. THe contract has ETH
      * 4. Implicitly, your subscription has LINK
@@ -121,7 +121,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
         public
         view
         // ovveride // this was for actual CHanilink contract!
-        returns (bool upkeepNeeded, bytes memory /* performData */) // THIS is a way to initialize functions!!! It even starts as false
+        returns (bool upkeepNeeded, bytes memory /* performData */) // THIS is a way to initialize function parameters!!! It even starts as false
     {
         // upkeepNeeded = true; // This will be automatically returned ie!!!!
         // upkeepNeeded = (block.timestamp - lastTimeStamp) > interval; // Example of Chainlink docs

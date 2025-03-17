@@ -424,3 +424,13 @@ forge script script/Interactions.s.sol:FundSubscription
 - But we mocked everything to do it locally to test it.
 - Scripts are also required to be tested.
 - I just tested it locally! 
+
+### Coverage Report
+```
+forge coverage --report debug > coverage.txt
+```
+
+Challenge: Figure how to cover all tests
+
+testCheckUpKeepReturnsFalseIfEnoughTimeHasPassed
+testCheckUpKeepReturnsTrueWhenParametersAreGood
