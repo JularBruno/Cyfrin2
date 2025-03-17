@@ -5,6 +5,7 @@
 pragma solidity ^0.8.18;
 
 import {Test} from "forge-std/Test.sol";
+import {Vm} from "forge-std/Vm.sol";
 import {DeployRaffle} from "script/DeployRaffle.s.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 import {Raffle} from "src/Raffle.sol";
@@ -156,8 +157,74 @@ contract RaffleTest is Test {
         assert(upkeepNeeded);
     }
 
+    /* 
+        PERFORM UPKEEP
+     */
 
-    function testRaffle() public {
+    function testPerformUpkeepCanOnlyRunIfCheckUpkeepIsTrue() public {
+        // Arrange
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1); 
+        // Act / Assert
+        // could do an assert success, but this works, at failing it is the same as an assert
+        raffle.performUpkeep();
+    }
+
+    // test it reverts with correct error
+    function testPerformUpkeepRevertsIfCheckUpkeepIsFalse() public { 
+        // Arrange
+        uint256 currentBalance = 0; 
+        uint256 numPlayers = 0;
+        Raffle.RaffleState rState = raffle.getRaffleState();
+
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        currentBalance = currentBalance + entranceFee;
+        numPlayers = 1;
+
+        // Act / Assert
+        vm.expectRevert(
+            abi.encodeWithSelector(Raffle.Raffle__UpkeepNotNeeded.selector, 
+            currentBalance, numPlayers, rState)
+        );
+        raffle.performUpkeep();
+    }
+
+    modifier raffleEntered() {
+        vm.prank(PLAYER);
+        raffle.enterRaffle{value: entranceFee}();
+        vm.warp(block.timestamp + interval + 1);
+        vm.roll(block.number + 1); 
+        _;
+    }
+
+    // REQUEST emited events
+    function testPerformUpkeepUpdatesRaffleStateAndEmitsRequestId() public raffleEntered {
+        // Arrange // finally used modifier
+        
+        // Act 
+        vm.recordLogs(); // remmember you can check foundry book docs
+        raffle.performUpkeep(); // keep track of all logs of this function
+
+        // super special cheatcode 
+        Vm.Log[] memory entries = vm.getRecordedLogs(); // entries array a lot of logs
+        
+        // TOPICS in entries are indexed paremeters in an event!
+        // entries[1] because vrf emits an event first and .topics[1] because 0 is used for sth else
+        bytes32 requestId = entries[1].topics[1];
+        
+        // Assert
+        Raffle.RaffleState raffleState = raffle.getRaffleState();
+        assert(uint256(requestId) > 0); // just checking if any emit
+        
+        assert(uint256(raffleState) == 1);
+
+        //     ├─ [0] VM::getRecordedLogs() in test has the log of VRF contract
+    }
+
+    function test() public {
         // Arrange
         vm.prank(PLAYER);
         // Act 

@@ -64,6 +64,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     /* Events */
     event RaffleEntered(address indexed player);
     event WinnerPicked(address indexed player);
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     constructor(
         uint256 entranceFee,
@@ -161,8 +162,11 @@ contract Raffle is VRFConsumerBaseV2Plus {
         });
 
         // restrict people of entering if we are picknig the winner 
-        // uint256 requestId = 
+        uint256 requestId = 
         s_vrfCoordinator.requestRandomWords(request);
+
+        // VRF Coordinator actually emits this event! Redundant, but easier to test
+        emit RequestedRaffleWinner(requestId);
     }
 
     // Fulffill raffle
