@@ -7,11 +7,11 @@ pragma solidity ^0.8.18;
 import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {DeployRaffle} from "script/DeployRaffle.s.sol";
-import {HelperConfig} from "script/HelperConfig.s.sol";
+import {HelperConfig, CodeConstants} from "script/HelperConfig.s.sol";
 import {Raffle} from "src/Raffle.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
-contract RaffleTest is Test {
+contract RaffleTest is CodeConstants, Test {
 
     Raffle public raffle;
     HelperConfig public helperConfig;
@@ -229,7 +229,14 @@ contract RaffleTest is Test {
         FULFILL RANDOM WORDS
      */
 
-    function testFullfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered {
+    modifier skipFork() {
+        if(block.chainid != LOCAL_CHAIN_ID) {
+            return;
+        }
+        _;
+    }
+ 
+    function testFullfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered skipFork {
         // Arrange // Act // Assert
         // check again vrf coordinator to check error
         vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
@@ -239,7 +246,7 @@ contract RaffleTest is Test {
     }
 
     /* END TO END big ass test */
-    function testFullfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEntered {
+    function testFullfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEntered skipFork {
         // Arrange
         uint256 additionalEntrants = 3;
         uint256 startingIndex = 1; // this to not start with address 0
@@ -278,5 +285,7 @@ contract RaffleTest is Test {
         assert(endingTimeStamp > startingTimeStamp);
         // so this failed because vrf balance was not enough, so in interactions we funded the subscription with more money
     }
+
+
     
 }

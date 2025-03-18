@@ -443,3 +443,11 @@ Using random inputs for testing smart contracts, emphasizing the importance of m
 - When runned we can see (runs: 256, μ: 82444, ~: 82444) and here it says that it tried 256 times.
 - Can be modified in toml, with fuzz to run as many times as required.
 - Some weird scenarios can be tested with many more fuzz times test, leaving it in background running.
+
+### Forked test environment and dynamic private keys
+
+- Running locally does random private key
+- start broadcast can have an address or account
+- Created dynamic account for each env
+    - locally it uses always the same account, copied from Base.sol of forge-std 
+    - for the fork url it should have the metamask asociated with alchemy account
