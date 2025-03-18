@@ -9,6 +9,7 @@ import {Vm} from "forge-std/Vm.sol";
 import {DeployRaffle} from "script/DeployRaffle.s.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 import {Raffle} from "src/Raffle.sol";
+import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 contract RaffleTest is Test {
 
@@ -224,9 +225,23 @@ contract RaffleTest is Test {
         //     ├─ [0] VM::getRecordedLogs() in test has the log of VRF contract
     }
 
+    /* 
+        FULFILL RANDOM WORDS
+
+        testFullfillRandomWords
+     */
+
+    function testFullfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered {
+        // Arrange // Act // Assert
+        // check again vrf coordinator to check error
+        vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
+        // requestId and consumer, but we need to test many requests ids not just random one
+        // randomRequestId FUZZ
+        VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
+    }
+    
     function test() public {
         // Arrange
-        vm.prank(PLAYER);
         // Act 
         // Assert
     }
