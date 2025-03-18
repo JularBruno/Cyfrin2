@@ -56,7 +56,7 @@ contract FundSubscription is Script, CodeConstants {
         // both fundSubscription and transferAndCall are functions of vrf for testing with funds
         if(block.chainid == LOCAL_CHAIN_ID) {
             vm.startBroadcast();
-            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(subscriptionId, FUND_AMOUNT);
+            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(subscriptionId, FUND_AMOUNT * 100);
             vm.stopBroadcast();
         } else { // this is for adding funds in sepolia
             vm.startBroadcast();

@@ -4,7 +4,7 @@
 
 pragma solidity ^0.8.18;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {DeployRaffle} from "script/DeployRaffle.s.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
@@ -227,8 +227,6 @@ contract RaffleTest is Test {
 
     /* 
         FULFILL RANDOM WORDS
-
-        testFullfillRandomWords
      */
 
     function testFullfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered {
@@ -239,11 +237,46 @@ contract RaffleTest is Test {
         // randomRequestId FUZZ
         VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
     }
-    
-    function test() public {
+
+    /* END TO END big ass test */
+    function testFullfillRandomWordsPicksAWinnerResetsAndSendsMoney() public raffleEntered {
         // Arrange
+        uint256 additionalEntrants = 3;
+        uint256 startingIndex = 1; // this to not start with address 0
+        address expectedWinner = address(1); // not sure about the math behind this
+
+        for (uint i = startingIndex; i <startingIndex+ additionalEntrants; i++) {
+            address newPlayer = address(uint160(i)); // convert any number into address very CONSOLE
+            hoax(newPlayer, 1 ether); // prank and found remmember
+            raffle.enterRaffle{value: entranceFee}();
+        }
+        
+        uint256 startingTimeStamp = raffle.getLastTimestamp();
+        uint256 winnerStartingBalance = expectedWinner.balance;
+
         // Act 
+        vm.recordLogs();
+        raffle.performUpkeep(); // kick chainlink vrf
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        bytes32 requestId = entries[1].topics[1];
+
+        // now we call vrf coordinator to mock the call
+        // just like calling the get random word
+        VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(uint256(requestId), address(raffle));
+
         // Assert
+        address recentWinner = raffle.getRecentWinner();
+        Raffle.RaffleState raffleState = raffle.getRaffleState();
+        uint256 winnerBalance = recentWinner.balance;
+        uint256 endingTimeStamp = raffle.getLastTimestamp();
+        uint256 prize = entranceFee * (additionalEntrants + 1);
+
+        assert(recentWinner == expectedWinner);
+        assert(uint256(raffleState) == 0);
+        assert(winnerBalance == winnerStartingBalance + prize);
+        assert(endingTimeStamp > startingTimeStamp);
+        // so this failed because vrf balance was not enough, so in interactions we funded the subscription with more money
     }
     
 }
