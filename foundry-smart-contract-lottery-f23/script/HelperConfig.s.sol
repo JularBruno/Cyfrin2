@@ -57,13 +57,16 @@ contract HelperConfig is CodeConstants, Script {
         return NetworkConfig({
             entranceFee: 0.1 ether, // 1e16
             interval: 30, // 30 seconds
-            vrfCoordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625,
+            vrfCoordinator: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B,
+            // vrfCoordinator: 0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625,
             keyHash: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             subscriptionId: 8624174687644442225599354666885700418255358039814492564654394905292199905732,
+            // subscriptionId: 0,
             callbackGasLimit: 500000, // 500,000 gas
             link: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
             account: 0x6B2bF09B03f4378817d1dd559A8B1E72ec6cE3a9
+            // account: 0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B
         });
     }
 

@@ -425,7 +425,7 @@ forge script script/Interactions.s.sol:FundSubscription
 - Scripts are also required to be tested.
 - I just tested it locally! 
 
-### Coverage Report
+#### Coverage Report
 ```
 forge coverage --report debug > coverage.txt
 ```
@@ -444,10 +444,30 @@ Using random inputs for testing smart contracts, emphasizing the importance of m
 - Can be modified in toml, with fuzz to run as many times as required.
 - Some weird scenarios can be tested with many more fuzz times test, leaving it in background running.
 
-### Forked test environment and dynamic private keys
+#### Forked test environment and dynamic private keys
 
 - Running locally does random private key
 - start broadcast can have an address or account
 - Created dynamic account for each env
     - locally it uses always the same account, copied from Base.sol of forge-std 
     - for the fork url it should have the metamask asociated with alchemy account
+
+### Deploy the lottery on the testnet pt.1
+
+
+This was a headache. 
+
+- Make sure you have your env with SEPOLIA_RPC_URL and ETHERSCAN_API_KEY. This are from alchemy and etherscan sepolia. 
+- Create a "default" account as a cast wallet so you can call it, it must have your wallet used in alchemy, seplolia, and chainlink.
+- Chainlink VRF must be seted up, funded and you can run the make
+- Make `make deploy ARGS="--network sepolia"` should work to deploy the contract and create the consumer on VRF. This was all very slow and bugged.
+- RUn this since verifying wont be possible by command, at least I couldnt make it work. GO to your contract on sepolia etherscan and search for validatoin. Use the json.json to finish the form. 
+
+```
+forge verify-contract 0xA12e8d7072a640c2a292905a9d1939238937855D src/Raffle.sol:Raffle --etherscan-api-key $ETHERSCAN_API_KEY --rpc-url $SEPOLIA_RPC_URL --show-standard-json-input > json.json
+```
+
+- After verifying the raffle contract can be written in etherscan.
+- It again took some time but vrf, automation, and the contract in etherscan are working. The last step would be to see the recent winner.
+
+- Should have deployed anvil first. To test properly and we saw many times that first anvil, then stage, then some prod env.
