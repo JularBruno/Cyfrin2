@@ -22,3 +22,9 @@
 [submodule "foundry-smart-contract-lottery-f23/lib/solmate"]
 	path = foundry-smart-contract-lottery-f23/lib/solmate
 	url = https://github.com/transmissions11/solmate
+[submodule "foundry-erc20-f23/lib/foundry-devops"]
+	path = foundry-erc20-f23/lib/foundry-devops
+	url = https://github.com/cyfrin/foundry-devops
+[submodule "foundry-erc20-f23/lib/openzeppelin-contracts"]
+	path = foundry-erc20-f23/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts

@@ -471,3 +471,15 @@ forge verify-contract 0xA12e8d7072a640c2a292905a9d1939238937855D src/Raffle.sol:
 - It again took some time but vrf, automation, and the contract in etherscan are working. The last step would be to see the recent winner.
 
 - Should have deployed anvil first. To test properly and we saw many times that first anvil, then stage, then some prod env.
+
+### Implementing console log in your smart contract, Debug using forge test
+
+Console log from forge std can be used on contract.
+Remove them for deploy, it even costs gas!
+
+`forge test --debug` very useful for advanced debugging.
+
+###
+- https://automation.chain.link/
+- https://vrf.chain.link/
+- https://sepolia.etherscan.io/address/0xA12e8d7072a640c2a292905a9d1939238937855D#readContract
