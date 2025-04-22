@@ -65,18 +65,14 @@ $ anvil --help
 $ cast --help
 ```
 
-# Advanced foundry
 
-## Develop an ERC20 Crypto Currency
+## Develop an NFT Collection
+### What is an NFT
 
-### Introduction to ERC fundamentals and ERC20
-- Ethereum Improvement Proposals (EIPs): proposals for upgrading protcols for development or even l1 features.
-- ERC20 Token Standard: how to create tokens.
-- ERC20: token deployed in a chain using the standard. Many examples, some with erc77 because is better.
-- For creating a token We should build a contract that has some functions declared for token standards.
+- ERC-721 non fungible token, another standard like ERC20
+- ERC20 are a mapping between an adress and what it holds
+- ERC-721 unique token id with unique owners and unique URI
+- URI: URL and URN, identifier of  a resource
+- IPFS URI can store an image and you can point to NFT URI, this holds nft offchain - omg so much gas
+- Is best to have on chain to hold the authenticity of the NFT
 
-### Explore Open Zeppelin
-Leverage pre-deployed, audited, and ready-to-go contracts to simplify the creation process of your ERC20 token or many others. https://www.openzeppelin.com/solidity-contracts
-Also solmate is very good for inheriting contracts.
-
-REMOVE LIB OUT AND ANYUTHING ELSE NOT NECESSARY FROM GITHUB REPO
