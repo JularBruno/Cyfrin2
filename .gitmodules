@@ -28,3 +28,9 @@
 [submodule "foundry-erc20-f23/lib/openzeppelin-contracts"]
 	path = foundry-erc20-f23/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "foundry-nft-f23/lib/foundry-devops"]
+	path = foundry-nft-f23/lib/foundry-devops
+	url = https://github.com/cyfrin/foundry-devops
+[submodule "foundry-nft-f23/lib/openzeppelin-contracts"]
+	path = foundry-nft-f23/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts

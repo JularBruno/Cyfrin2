@@ -47,6 +47,7 @@ $ anvil
 
 ### Deploy
 
+
 ```shell
 $ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
 ```
@@ -76,3 +77,11 @@ $ cast --help
 - IPFS URI can store an image and you can point to NFT URI, this holds nft offchain - omg so much gas
 - Is best to have on chain to hold the authenticity of the NFT
 
+### Introduction to IPFS
+
+- IPFS creaetes own node to host storage, you can make it more accessible in more nodes
+- Deploy app to ipfs
+    - Downloaded appimage that can be executed
+    - Imported some file 
+    - Now the file can be opened with ipfs:// a browser with ipfs companion, making it visible
+    - We have and can see our node
