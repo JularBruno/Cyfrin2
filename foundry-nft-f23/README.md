@@ -66,7 +66,6 @@ $ anvil --help
 $ cast --help
 ```
 
-
 ## Develop an NFT Collection
 ### What is an NFT
 
@@ -85,3 +84,70 @@ $ cast --help
     - Imported some file 
     - Now the file can be opened with ipfs:// a browser with ipfs companion, making it visible
     - We have and can see our node
+
+
+### Test the NFTs smart contract
+
+```
+chisel
+Welcome to Chisel! Type `!help` to show available commands.
+➜ string memory cat = "cat";
+➜ string memory dog = "dog";
+➜ cat
+Type: string
+├ UTF-8: cat
+├ Hex (Memory):
+├─ Length ([0x00:0x20]): 0x0000000000000000000000000000000000000000000000000000000000000003
+├─ Contents ([0x20:..]): 0x6361740000000000000000000000000000000000000000000000000000000000
+├ Hex (Tuple Encoded):
+├─ Pointer ([0x00:0x20]): 0x0000000000000000000000000000000000000000000000000000000000000020
+├─ Length ([0x20:0x40]): 0x0000000000000000000000000000000000000000000000000000000000000003
+└─ Contents ([0x40:..]): 0x6361740000000000000000000000000000000000000000000000000000000000
+➜ bytes memory encodedCat = abi.encodePacked(cat);
+➜ encodedCat
+Type: dynamic bytes
+├ Hex (Memory):
+├─ Length ([0x00:0x20]): 0x0000000000000000000000000000000000000000000000000000000000000003
+├─ Contents ([0x20:..]): 0x6361740000000000000000000000000000000000000000000000000000000000
+├ Hex (Tuple Encoded):
+├─ Pointer ([0x00:0x20]): 0x0000000000000000000000000000000000000000000000000000000000000020
+├─ Length ([0x20:0x40]): 0x0000000000000000000000000000000000000000000000000000000000000003
+└─ Contents ([0x40:..]): 0x6361740000000000000000000000000000000000000000000000000000000000
+➜ bytes32 catHash = keccak256(encodedCat)
+➜ catHash
+Type: bytes32
+└ Data: 0x52763589e772702fa7977a28b3cfb6ca534f0208a2b2d55f7558af664eac478a
+```
+
+#### Deploy your NFTs on the testnet
+
+Could be deployed to anvil but used Makefile deploy
+Added env with SEPOLIA_RPC_URL and PRIVATE_KEY
+Makefile includes source env
+Sepolia was too gas expensive for me to deploy I runned it in anvil 
+```
+forge script script/DeployBasicNft.s.sol:DeployBasicNft --rpc-url 127.0.0.1:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+```
+broadcast run latest 
+ffi = true
+
+#### IPFS and Pinata vs HTTP vs on chain SVGs
+Host nft on more descentralized because ipfs node could be the only one pined. Other people could pin it. It is poular because is cheap.
+
+Pinata is more descentralized. Upload, get hash.
+File should be updated both in ipfs and pinata.
+
+#### What is an SVG?
+
+Since we want an svg as a uri, you can decode it
+
+base64 turns svg into code
+
+### Encoding SVGs to be stored onchain
+
+IMAGE URI, encoded to save gas
+data:image/svg+xml;base64, + base64 -i
+
+token uri descrives everything in nft
+
+openzepelin has a tool to convert json object into json object uri 

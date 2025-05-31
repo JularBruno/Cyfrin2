@@ -10,7 +10,7 @@ contract DeployBasicTest is Test {
     DeployBasicNft public deployer;
     BasicNft public basicNft;
     address public USER = makeAddr("user");
-    string public constant PUG = // could attemot own upload to ipfs
+    string public constant PUG = // could attempt own upload to ipfs
     "ipfs://bafybeig37ioir76s7mg5oobetncojcm3c3hxasyd4rvid4jqhy4gkaheg4/?filename=0-PUG.json";
 
     function setUp() public {
