@@ -151,3 +151,6 @@ data:image/svg+xml;base64, + base64 -i
 token uri descrives everything in nft
 
 openzepelin has a tool to convert json object into json object uri 
+
+### Create the deployment script
+base64 -i ./img/example.svg
