@@ -190,9 +190,11 @@ Cast Call
 
 ### Advanced EVM - Opcodes, calling, etc
 
+Encoding.sol
+
 abi.encode abi.encodePacked
 
-- evm overview, compiles abi and bin(binary)
+- EVM overview, compiles abi and bin(binary)
 - transaction fields on contract deployment, is special since To: empty and Data: contract init code and bytecode 
 - bytecode, just as a dictionary for evm machines, made with opcode 
 - actually encodePacked encodes to bytecode without restrictions
@@ -204,3 +206,8 @@ Can be seen on etherscan Input data field, also can be seen in hex, bytes (evm k
 Useful for sending directly function calls, requires
 - abi
 - Contract address
+
+### EVM signatures selectors
+CallAnything.sol
+Low level way of interacting with contracts, best to do it with an interface.
+The two contracts of the sol file can interact thanks 
