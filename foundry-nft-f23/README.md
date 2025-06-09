@@ -178,3 +178,29 @@ Some checks and tests
 cast call 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 "ownerOf(uint256)(address)" 0 --rpc-url http://localhost:8545
 cast call 0x5FbDB2315678afecb367f032d93F642f64180aa3 "tokenURI(uint256)(string)" 0 --rpc-url http://localhost:8545
 ```
+
+Cast send
+- Sends a real transaction
+- Changes contract state 
+- Requires a private key and ETH
+Cast Call
+- Calls a view or pure function on a contract
+- Does not cost gas
+- Does not change state
+
+### Advanced EVM - Opcodes, calling, etc
+
+abi.encode abi.encodePacked
+
+- evm overview, compiles abi and bin(binary)
+- transaction fields on contract deployment, is special since To: empty and Data: contract init code and bytecode 
+- bytecode, just as a dictionary for evm machines, made with opcode 
+- actually encodePacked encodes to bytecode without restrictions
+
+### Advanced EVM - Encoding
+
+Transaction fields on function call Data: what to send to To address
+Can be seen on etherscan Input data field, also can be seen in hex, bytes (evm knows which function to call)
+Useful for sending directly function calls, requires
+- abi
+- Contract address
