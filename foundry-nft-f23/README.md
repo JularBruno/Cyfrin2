@@ -140,34 +140,41 @@ File should be updated both in ipfs and pinata.
 #### What is an SVG?
 
 Since we want an svg as a uri, you can decode it
-
-base64 turns svg into code
+```
+base64 -i
+```
+turns svg into code
 
 ### Encoding SVGs to be stored onchain
 
 IMAGE URI, encoded to save gas
-data:image/svg+xml;base64, + base64 -i
 
-token uri descrives everything in nft
+data:image/svg+xml;base64, + `base64 -i`
+
+Token uri describes everything in nft
 
 openzepelin has a tool to convert json object into json object uri 
 
 #### Create the deployment script
-base64 -i ./img/example.svg
+```base64 -i ./img/example.svg ```
 
 
 ### Deploy and interact using Anvil
-
+```
 forge script script/DeployMoodNft.s.sol:DeployMoodNft --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast
 
 cast send <CONTRACT_ADDRESS> 0x5FbDB2315678afecb367f032d93F642f64180aa3 "mintNft()" --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://localhost:8545
-
+```
 On metamask import nft on gochaintestnet, contractAddress, id 0 import
 
 Flip mood
+```
 cast send 0x5FbDB2315678afecb367f032d93F642f64180aa3 "flipMood(uint256)" 0 --private-key ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --
 rpc-url http://localhost:8545
+```
 
-Some hecks and tests
+Some checks and tests
+```
 cast call 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 "ownerOf(uint256)(address)" 0 --rpc-url http://localhost:8545
 cast call 0x5FbDB2315678afecb367f032d93F642f64180aa3 "tokenURI(uint256)(string)" 0 --rpc-url http://localhost:8545
+```
