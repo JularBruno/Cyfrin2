@@ -209,5 +209,23 @@ Useful for sending directly function calls, requires
 
 ### EVM signatures selectors
 CallAnything.sol
+
 Low level way of interacting with contracts, best to do it with an interface.
 The two contracts of the sol file can interact thanks 
+
+### Verifying a transaction in Metamask
+A transfer has a hex, thats what we want to check if correct
+A transaction in metamask hex should be verified
+
+```cast --calldata-decode``` "function(params)" and calldata 
+sometimes its matched in metamask function name
+
+grab function selector
+```cast sig "transferFrom(address,adress, uint256)"```
+retrieves what function selector should be
+
+*signature database* import has a glosary of selectors (some selectors match, that cant be done)
+
+1. Check the address
+2. Check function selector
+3. Decode the calldata
