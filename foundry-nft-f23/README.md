@@ -231,33 +231,3 @@ retrieves what function selector should be
 3. Decode the calldata
 
 
-this might go on new project
-## Section 3: Develop a DeFi Protcol
-
-Bankless.com
-metamask learn
-try aave and u uniswap
-
-### DeFi introduction
-its hard, best for being cool at programming
-- DeFiLlama has the examples, since we are going to introduce defi functionalities. 
-- Aave shows example of how staking coins gives assets, and its because some people is borrowing those assets. Premisionless baking and borrowing of assets.
-- Uniswap just allows to swap assets premisionless descentralized.
-- MEV plays the defi industry, concept is if you validate transactions helps you create protcol to help you. Terrifying and useful
-- makerdao: dao token, actually what people work with and create.
-- defi: mainly Premisionless, opensource finance.
-
-defi to take over the world
-
-### Project code walkthrough
-Two main files 
-- DecentralizedStableCoin.sol has Burn mint
-- main file DSCEngine.sol controls the DecentralizedStableCoin.sol
-- Stablecoin works because of collaterals
-- you can redeem remove burn liquidated mintDsc
-- also test folder
-- mocks
-- fuzz tests also
-- scripts as well
-- primitives and products are all included here
-Stablecoins what really are:

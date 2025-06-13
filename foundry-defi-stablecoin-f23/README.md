@@ -1,0 +1,65 @@
+Stablecoin
+1. Relative staility: Anchored or pegged to usd dolar (floating is difficult)
+    1. chainlink price feed
+    2. set function to exchange eth and btc to any usd value around a dolar
+2. Stability mecanism (minting): algorithmic (decentralized)
+    1. people can only mint stablecoin with enough collateral (coded)
+3. Collateral: exogenous (crypto)
+    1. weth (weth Wrapped eth)
+    2. wbtc
+
+
+## Section 3: Develop a DeFi Protcol
+
+Bankless.com
+metamask learn
+try aave and u uniswap
+
+### DeFi introduction
+its hard, best for being cool at programming
+- DeFiLlama has the examples, since we are going to introduce defi functionalities. 
+- Aave shows example of how staking coins gives assets, and its because some people is borrowing those assets. Premisionless baking and borrowing of assets.
+- Uniswap just allows to swap assets premisionless descentralized.
+- MEV plays the defi industry, concept is if you validate transactions helps you create protcol to help you. Terrifying and useful
+- makerdao: dao token, actually what people work with and create.
+- defi: mainly Premisionless, opensource finance.
+
+defi to take over the world
+
+### Project code walkthrough
+Two main files 
+- DecentralizedStableCoin.sol has Burn mint
+- main file DSCEngine.sol controls the DecentralizedStableCoin.sol
+- Stablecoin works because of collaterals
+- you can redeem remove burn liquidated mintDsc
+- also test folder
+- mocks
+- fuzz tests also
+- scripts as well
+- primitives and products are all included here
+Stablecoins what really are:
+
+### Introduction to stablecoins
+non volatile crypto assets, value fluctuates very little. Is not necessary pegged to some real asset.
+low volatility fulfills (use dollars as example for next things)
+- storage value
+- unit of account
+- medium of exchange
+
+web3 money desentralized money for following previous qualities
+
+categories of stablecoins (not necessary categorized like usual media)
+- relative stability: pegged anchored or floating(not tied) to another asset. This could be even more stable to real value against inflationary assets. There is algorithmic based coins that are more stable to buying power https://reflexer.finance/
+
+- stability method: governed or algorithmic. minting or burning, who or what does it. Governed = single person/entity. Algorithmic = permissionles algorithmic without intervetion for minting and burning. Hybrid ones Also includes DAO for voting interest rates and many more things.
+
+- collateral type: stuff backing our stablecoin. Exogenous collateral originates from outside, Endogenous from inside.
+If stablecoin fails, does the underlying collateral also fail.
+Owns issuance of collateral? UST is a good example (terra luna fail).
+Ideally these are overcollateralised. DAI is mor exo, frax is goodly divised, ust plumb was because it was mostly endo.
+Scalability: Exo can only have stalecoin marketcap as high than that of your collateral. Endo not necessary. (exo can scale)
+
+This video explains the position DAI occupies in the spectrum of the behaivours mentioned above. Also how it bases its collateral, allows minting less than actual assets, why it burns, and has a stability fee (collateralized debt position) if collateral is not up people can liquidate (also people vote). 
+
+leverage investing is what drives people to mint this stablecoins,Allows to exposure to other assets.
+
