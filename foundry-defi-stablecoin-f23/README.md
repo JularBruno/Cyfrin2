@@ -76,3 +76,10 @@ liquidate function is usefull since collateral value can descend, so when this h
 For not being undercollateralized you can set a buffer, called a treshold, of 150% (ie if im holding 50 bucks there should be 75 for my collateral). THis could even be rewarded (holding collateral) because could save people that need to be liquidated
 
 could comment all functions of DSCEngine before starting, could create the script for testing with it, should create tests along
+
+#### Create the deposit collateral function
+
+desposit is the first thing people would do
+
+
+Reentrantcy are the most common attacks, all functions might need to be non reentrant by default. when working with outside contracts
