@@ -63,3 +63,8 @@ This video explains the position DAI occupies in the spectrum of the behaivours 
 
 leverage investing is what drives people to mint this stablecoins,Allows to exposure to other assets.
 
+### DecentralizedStableCoin.sol
+Is ERC20Burnable, because it has a Burn function, ideal for maintingin peg price
+Goberned by our engine (has its abilities, collateral minting stability)
+
+super calls super class or parent class
