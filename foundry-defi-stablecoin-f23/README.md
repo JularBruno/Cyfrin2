@@ -63,8 +63,16 @@ This video explains the position DAI occupies in the spectrum of the behaivours 
 
 leverage investing is what drives people to mint this stablecoins,Allows to exposure to other assets.
 
-### DecentralizedStableCoin.sol
+#### DecentralizedStableCoin.sol
 Is ERC20Burnable, because it has a Burn function, ideal for maintingin peg price
 Goberned by our engine (has its abilities, collateral minting stability)
 
 super calls super class or parent class
+
+#### Project setup - DSCEngine
+
+liquidate function is usefull since collateral value can descend, so when this happens, the DSC(the coin created) minted, can be liquidated to save protcol by removing people from the position of DSC
+
+For not being undercollateralized you can set a buffer, called a treshold, of 150% (ie if im holding 50 bucks there should be 75 for my collateral). THis could even be rewarded (holding collateral) because could save people that need to be liquidated
+
+could comment all functions of DSCEngine before starting, could create the script for testing with it, should create tests along
