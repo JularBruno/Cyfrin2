@@ -154,10 +154,10 @@ contract DSCEngine is ReentrancyGuard {
      * @param amountDscToMint The amount of DSC to mint
      * @notice this function will deposit collateral and mint DSC in one transaction
      */
-    function despositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToMint) external 
+    function depositCollateralAndMintDsc(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToMint) external 
         // moreThanZero(amountCollateral) moreThanZero(amountDscToMint) isAllowedToken(tokenCollateralAddress) nonReentrant 
     {
-        despositCollateral(tokenCollateralAddress, amountCollateral);
+        depositCollateral(tokenCollateralAddress, amountCollateral);
         mintDsc(amountDscToMint);
 
     }
@@ -167,7 +167,7 @@ contract DSCEngine is ReentrancyGuard {
      * @param tokenCollateralAddress the address of the token to deposit as collateral
      * @param amountCollateral  the amount of collateral to deposit
      */
-    function despositCollateral(
+    function depositCollateral(
         address tokenCollateralAddress, 
         uint256 amountCollateral
     ) 
@@ -409,4 +409,9 @@ contract DSCEngine is ReentrancyGuard {
         // the return value from CL will be 1000 * 1e8
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION; // (1000 * 1e8 * (1e10)) * 1000 * 1e18; same units of precition  
     }
+
+    function getAccountInformation(address user) external view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
+        (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+    }
+
 }
