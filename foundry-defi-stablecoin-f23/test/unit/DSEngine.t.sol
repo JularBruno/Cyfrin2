@@ -2,6 +2,9 @@
 pragma solidity 0.8.19;
 
 import {Test} from "forge-std/Test.sol";
+// import {Test, console} from "forge-std/Test.sol";
+import "forge-std/console2.sol";
+
 import {DeployDSC} from "../../script/DeployDSC.s.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
@@ -24,6 +27,10 @@ contract DSCEngineTest is Test {
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
+
+    uint256 public constant AMOUNT_COLLATERAL_FOR_REDEEM = 1 ether;
+    uint256 public constant AMOUNT_TO_MINT = 3 ether;
+    uint256 public constant AMOUNT_TO_MINT_MORE_THAN_COLLATERAL = 8 ether;
     
     function setUp() public {
         deployer = new DeployDSC();
@@ -98,7 +105,7 @@ contract DSCEngineTest is Test {
 
     modifier depositCollateral() {
         vm.startPrank(USER);
-        ERC20Mock(weth).approve(address(dsce), AMOUNT_COLLATERAL);
+        ERC20Mock(weth).approve(address(dsce), AMOUNT_COLLATERAL); // user gives contract permission to tranfer AMOUNT_COLLATERAL worth of weth on their behalf
         dsce.depositCollateral(weth, AMOUNT_COLLATERAL);
         vm.stopPrank();
         _;
@@ -113,5 +120,61 @@ contract DSCEngineTest is Test {
         assertEq(AMOUNT_COLLATERAL, expectedDepositAmount);
     }
 
+    /////////////// 
+    // My tests, I think the first ones should be about MINTING
+    ///////////////
+    // i think the bug on the course is about being able to redeem collateral based on the health factor calculation
+
+    // function testCanMintDscAfterCollateralDeposit() public depositCollateral {
+    function testCanMintDscAfterCollateralDepositAndHealthFactorRetrievesTheCorrectValue() public depositCollateral {
+
+        vm.startPrank(USER);
+        dsce.mintDsc(AMOUNT_TO_MINT);
+        vm.stopPrank();
+
+        (uint256 totalDscMinted, ) = dsce.getAccountInformation(USER);
+        assertEq(totalDscMinted, AMOUNT_TO_MINT);
+
+        uint256 userHealthFactor = dsce.getHealthFactor(USER);
+        assert(userHealthFactor > dsce.minHealthFactor());
+    }
+
+    function testCantMintMoreDscThanCollateralAvialable() public depositCollateral {
+
+        uint256 usdCollateralValue = dsce.getUsdValue(weth, AMOUNT_COLLATERAL);
+        uint256 maxSafeMint = (usdCollateralValue * dsce.getLiquidationThreshold()) / dsce.getLiquidationPrecision(); 
+        uint256 mintForExpectedRevert = maxSafeMint + 1;
+
+        vm.startPrank(USER);
+        vm.expectRevert();
+        dsce.mintDsc(mintForExpectedRevert);
+
+        vm.stopPrank();
+
+        // assert(userHealthFactor > dsce.minHealthFactor());
+    }
+
+    // TODO 80% COVERAGE
+
+    /////////////// 
+    // Reedeming
+    ///////////////
+    // // test cant redeem 0
+    // function testCanDepositCollateralAndThenRedeem() public depositCollateral {
+    //     uint256 userWethBalanceBefore = ERC20Mock(weth).balanceOf(USER);
+
+    //     vm.startPrank(USER);
+    //     dsce.redeemCollateral(weth, AMOUNT_COLLATERAL_FOR_REDEEM);
+    //     vm.stopPrank();
+
+    //     console.log('userWethBalanceBefore ', userWethBalanceBefore);
+    //     uint256 userWethBalanceAfter = ERC20Mock(weth).balanceOf(USER);
+    //     console.log('userWethBalanceAfter ', userWethBalanceAfter);
+
+    //     assertEq(userWethBalanceAfter, userWethBalanceBefore - AMOUNT_COLLATERAL_FOR_REDEEM);
+
+    //     // (, uint256 collateralValueInUsd) = dsce.getAccountInformation(USER);
+    //     // assertEq(collateralValueInUsd, 0);
+    // }
 
 }

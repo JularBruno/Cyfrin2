@@ -142,7 +142,6 @@ contract DSCEngine is ReentrancyGuard {
         i_dsc = DecentralizedStableCoin(dscAddress);
     }
 
-
     //////////////////
     // external functions
     ///////////////////
@@ -210,7 +209,7 @@ contract DSCEngine is ReentrancyGuard {
     function redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral) 
         public 
         moreThanZero(amountCollateral)
-        nonReentrant 
+        nonReentrant
     {
         /* REMOVED next code because of refactor, left it here for understanding the changes */
         // solidity reverts unsafe math, like having less than requering to redeem
@@ -232,7 +231,9 @@ contract DSCEngine is ReentrancyGuard {
      * @param amountDscToMint the amount of DSC to mint
      * @notice they must have more collateral than the minimun threshold
      */
-    function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
+    function mintDsc(uint256 amountDscToMint) 
+        public moreThanZero(amountDscToMint) nonReentrant
+    {
         s_DSCMinted[msg.sender] += amountDscToMint;
 
         // if they minted too much($150 DSC and 100 ETH)
@@ -266,6 +267,7 @@ contract DSCEngine is ReentrancyGuard {
     // 75 backing 50 dsc, liquidator take 75 backing and burns off the 50 dsc
 
     /**
+     * @notice To maintain the protocol's solvency by allowing the removal of undercollateralized positions.
      * @param collateral the erc20 collateral address to liquidate from the user
      * @param user the user who has broken the health factor. Their _healthFactor is should be bellow MIN_HELTH_FACTOR
      * @param debtToCover The amount of DSC you want to burn to imporve the user health factor
@@ -307,7 +309,6 @@ contract DSCEngine is ReentrancyGuard {
         _revertIfHealthFactorIsBroken(msg.sender);
     }
 
-    function getHealthFactor() external view {}
 
 
     //////////////////
@@ -333,6 +334,13 @@ contract DSCEngine is ReentrancyGuard {
         i_dsc.burn(amountDscToBurn);
     }
 
+    /**
+     * @notice To allow users to withdraw their deposited collateral, provided their position remains sufficiently collateralized
+     * @param tokenCollateralAddress a
+     * @param amountCollateral a
+     * @param from a
+     * @param to a
+     */
     function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to) 
         private 
     {
@@ -354,12 +362,18 @@ contract DSCEngine is ReentrancyGuard {
     /** 
      * Returns how close to liquidation the user is.
      * if the user goes bellow 1, they can get liquidated.
+     * @notice To quantify the safety margin of a position by comparing collateral value to debt value.
      */
     function _healthFactor(address user) private view returns (uint256 healthFactor) {
         // total DSC minted
         // total collateral VALUE
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
         // return (collateralValueInUsd / totalDscMinted); // (150 / 100) // this requires liquidation threshold
+
+        // this fixes the bug detected in the tests and required by the course
+        if (totalDscMinted == 0) {
+            return type(uint256).max;
+        }
 
         uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
         // the math here is easy, 150 * 50 = 7500 / 100 = 75 , this means undercollateralized becase its under the double threshold required
@@ -413,5 +427,20 @@ contract DSCEngine is ReentrancyGuard {
     function getAccountInformation(address user) external view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) {
         (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
     }
+    
+    function getHealthFactor(address user) external view returns (uint256 userHealthFactor) {
+        return _healthFactor(user); 
+    }
 
+    function minHealthFactor() public pure returns (uint256) {
+        return MIN_HEALTH_FACTOR;
+    }
+
+    function getLiquidationThreshold() external pure returns (uint256) {
+        return LIQUIDATION_THRESHOLD;
+    }
+
+    function getLiquidationPrecision() external pure returns (uint256) {
+        return LIQUIDATION_PRECISION;
+    }
 }
