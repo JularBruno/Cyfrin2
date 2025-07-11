@@ -193,7 +193,8 @@ contract DSCEngine is ReentrancyGuard {
      * also requires refactor
      */
     function redeemCollateralForDsc(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToBurn) 
-        external moreThanZero(amountCollateral) nonReentrant 
+        external moreThanZero(amountCollateral) 
+        // this was non reentrant throwing an error on testing, since next functoins also have it 
     {
         burnDsc(amountDscToBurn);
         redeemCollateral(tokenCollateralAddress, amountCollateral);
