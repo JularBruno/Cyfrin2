@@ -83,3 +83,10 @@ desposit is the first thing people would do
 
 
 Reentrantcy are the most common attacks, all functions might need to be non reentrant by default. when working with outside contracts
+
+### Create the fuzz tests handler pt.1
+1. what are our invariants/properties?
+
+Fuzz invariant testing video:
+
+- Fuzz is to supply random data in attempt to break system.
