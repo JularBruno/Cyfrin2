@@ -87,6 +87,13 @@ Reentrantcy are the most common attacks, all functions might need to be non reen
 ### Create the fuzz tests handler pt.1
 1. what are our invariants/properties?
 
-Fuzz invariant testing video:
+Fuzz/invariant testing video:
 
 - Fuzz is to supply random data in attempt to break system.
+- invariant: property of our system that should always hold
+- symbolic executoin/formal verirification: other type of validation for verificatoin
+- for fuzzing just define variabels fo the test and dont set value
+- stateless fuzzing is default where previous test is discarded
+    - stateful fuzzing final state of previous test, is now the starting state of next run "invariant_" (random function and data calls)
+
+- USE Handler based methodology
