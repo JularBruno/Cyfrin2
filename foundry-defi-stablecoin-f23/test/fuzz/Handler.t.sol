@@ -32,7 +32,21 @@ contract Handler is Test {
         wbtc = ERC20Mock(collateralTokens[1]);
     }
 
-    // redeem collateral
+    function mintDsc(uint256 amount) public {
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = dsce.getAccountInformation(msg.sender);
+        
+        int256 maxDscToMint = (int256(collateralValueInUsd) / 2) - int256(totalDscMinted);
+
+        if(maxDscToMint == 0) { return; }
+        
+        amount = bound(amount, 0, uint256(maxDscToMint));
+        
+        if(amount == 0) { return; }
+        
+        vm.startPrank(msg.sender);
+        dsce.mintDsc(amount);
+        vm.stopPrank();
+    }
 
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         // this adds some guardrails!
@@ -47,6 +61,20 @@ contract Handler is Test {
         dsce.depositCollateral(address(collateral), amountCollateral); 
         vm.stopPrank();
 
+    }
+
+    function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
+        ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
+
+        // redeem obviiously the max amount sender has on the system
+        uint256 maxCollateralToRedeem = dsce.getCollateralBalanceOfUser(address(collateral), msg.sender);
+
+        amountCollateral = bound(amountCollateral, 0, maxCollateralToRedeem); // if user is requiring more? fail on revert or not fail on revert
+        if (amountCollateral == 0) {
+            return; // THIS doesnt call function when fuzz
+        }
+
+        dsce.redeemCollateral(address(collateral), amountCollateral);
     }
 
 
