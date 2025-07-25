@@ -21,6 +21,9 @@ contract Handler is Test {
     ERC20Mock weth;
     ERC20Mock wbtc;
 
+    uint256 public timesMintIsCalled;
+    address[] public usersWithCollateralDeposited;
+
     uint256 MAX_DEPOSIT_SIZE = type(uint96).max;
     
     constructor(DSCEngine _dscEngine, DecentralizedStableCoin _dsc) {
@@ -32,10 +35,20 @@ contract Handler is Test {
         wbtc = ERC20Mock(collateralTokens[1]);
     }
 
-    function mintDsc(uint256 amount) public {
-        (uint256 totalDscMinted, uint256 collateralValueInUsd) = dsce.getAccountInformation(msg.sender);
+    function mintDsc(uint256 amount, uint256 addressSeed) public {
+        // this was not reaching mint
+        // msg.sender does not necessarly meant that the user deposited collateral, meaning cannot mint (there could be a bug as well)
+        if(usersWithCollateralDeposited.length == 0) { return; }
+        address sender = usersWithCollateralDeposited[addressSeed % usersWithCollateralDeposited.length]; 
+
+        (uint256 totalDscMinted, uint256 collateralValueInUsd) = 
+        // dsce.getAccountInformation(msg.sender); // this is left for explaining the not reaching mint
+        dsce.getAccountInformation(sender);
         
+        // console2.log("totalDscMinted ", totalDscMinted);
+        // console2.log("collateralValueInUsd ", collateralValueInUsd);
         int256 maxDscToMint = (int256(collateralValueInUsd) / 2) - int256(totalDscMinted);
+        // console2.log("maxDscToMint ", maxDscToMint);
 
         if(maxDscToMint == 0) { return; }
         
@@ -43,9 +56,10 @@ contract Handler is Test {
         
         if(amount == 0) { return; }
         
-        vm.startPrank(msg.sender);
+        vm.startPrank(sender);
         dsce.mintDsc(amount);
         vm.stopPrank();
+        timesMintIsCalled++;
     }
 
     function depositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
@@ -60,7 +74,8 @@ contract Handler is Test {
 
         dsce.depositCollateral(address(collateral), amountCollateral); 
         vm.stopPrank();
-
+        // there might be double push, check 
+        usersWithCollateralDeposited.push(msg.sender);
     }
 
     function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {

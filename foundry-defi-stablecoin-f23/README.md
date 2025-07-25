@@ -96,4 +96,9 @@ Fuzz/invariant testing video:
 - stateless fuzzing is default where previous test is discarded
     - stateful fuzzing final state of previous test, is now the starting state of next run "invariant_" (random function and data calls)
 
-- USE Handler based methodology
+- USE Handler based 
+
+#### Debugging the fuzz tests handler
+
+- ghost function to check where mint is called
+- forge inspect DSCEngine methods
