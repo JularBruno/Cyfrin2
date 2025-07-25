@@ -16,9 +16,7 @@ import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
-import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
+import {Handler} from "./Handler.t.sol";
 
 contract InvariantsTest is StdInvariant, Test {
     DeployDSC deployer;
@@ -27,12 +25,17 @@ contract InvariantsTest is StdInvariant, Test {
     HelperConfig config;
     address weth;
     address wbtc;
+    Handler handler;
     
     function setUp() external {
         deployer = new DeployDSC();
         (dsc, dsce, config) = deployer.run();
         (,, weth, wbtc, ) = config.activeNetworkConfig();
-        targetContract(address(dsce)); // go wild
+        // targetContract(address(dsce)); // this goes wild
+        handler = new Handler(dsce, dsc);
+        targetContract(address(handler));
+
+        // order tests, cant redeem if there isnt collateral
     }
 
     // this works only on fail_on_revert = false, it catches nothing. USELSS, ONLY FOR COURSE
