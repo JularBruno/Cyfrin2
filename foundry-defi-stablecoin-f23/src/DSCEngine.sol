@@ -30,6 +30,7 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import { DecentralizedStableCoin } from "./DecentralizedStableCoin.sol";
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import { OracleLib } from "./library/OracleLib.sol";
 
 /**
  * @title DSCEngine
@@ -65,6 +66,12 @@ contract DSCEngine is ReentrancyGuard {
     error DSCEngine__MintFailed();
     error DSCEngine__HealthFactorOk();
     error DSCEngine__HealthFactorNotImproved();
+
+    //////////////////
+    // Type
+    ///////////////////
+    using OracleLib for AggregatorV3Interface;
+    
 
     //////////////////
     // state variables
@@ -414,7 +421,7 @@ contract DSCEngine is ReentrancyGuard {
         // $/eth eth ??
         // $2000 / 1000 eth = 0.5 eth
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int price, , , ) = priceFeed.latestRoundData();
+        (, int price, , , ) = priceFeed.staleCheckLatestRoundData();
         // ($10e18 * 1e18) / ($2000e8 * 1e10)
         return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
     }
@@ -432,7 +439,7 @@ contract DSCEngine is ReentrancyGuard {
 
     function getUsdValue(address token, uint256 amount) public view returns (uint256 usdValue) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
-        (, int price, , , ) = priceFeed.latestRoundData();
+        (, int price, , , ) = priceFeed.staleCheckLatestRoundData();
         // 1 eth = $1000
         // the return value from CL will be 1000 * 1e8
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION; // (1000 * 1e8 * (1e10)) * 1000 * 1e18; same units of precition  
@@ -469,7 +476,7 @@ contract DSCEngine is ReentrancyGuard {
     function getCollateralTokenPriceFeed(address token) external view returns (address) {
         return s_priceFeeds[token];
     }
-    
+
     function calculateHealthFactor(
         uint256 totalDscMinted,
         uint256 collateralValueInUsd
