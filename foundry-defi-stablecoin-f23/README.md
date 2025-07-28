@@ -102,3 +102,12 @@ Fuzz/invariant testing video:
 
 - ghost function to check where mint is called
 - forge inspect DSCEngine methods
+
+#### Create the price feed handler
+
+COOL BUG we found that when price changes abruplty it makes system collapse
+// calldata=updateCollateralPrice(uint96) args=[2499]
+also we read some errors together with Patrick
+
+price feed should be between and we found that with invariant tests
+// 200% <-> 110%
