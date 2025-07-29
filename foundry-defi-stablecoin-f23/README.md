@@ -111,3 +111,6 @@ also we read some errors together with Patrick
 
 price feed should be between and we found that with invariant tests
 // 200% <-> 110%
+
+#### Finished Section 3
+https://lens.xyz/ very useful for governance and make some social app
