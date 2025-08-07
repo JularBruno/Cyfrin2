@@ -1,0 +1,106 @@
+# DSC Makefile for Anvil Testing
+
+# Default network (Anvil local)
+NETWORK_ARGS :=  --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://localhost:8545
+
+# Start Anvil (run this first in a separate terminal)
+anvil:
+	anvil
+
+# Deploy contracts to Anvil
+deploy:
+	@echo "Deploying DSC contracts to Anvil..."
+	forge script script/DeployDSC.s.sol:DeployDSC $(NETWORK_ARGS)
+
+	forge script script/DeployDSC.s.sol:DeployDSC --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://localhost:8545
+
+# Deposit collateral and mint DSC
+deposit-and-mint:
+	@echo "Depositing collateral and minting DSC..."
+	forge script script/Interactions.s.sol:DepositAndMint $(NETWORK_ARGS)
+
+# Just deposit collateral
+deposit:
+	@echo "Depositing collateral..."
+	forge script script/Interactions.s.sol:DepositCollateral $(NETWORK_ARGS)
+
+# Just mint DSC (requires existing collateral)
+mint:
+	@echo "Minting DSC..."
+	forge script script/Interactions.s.sol:MintDsc $(NETWORK_ARGS)
+
+# Burn DSC and redeem collateral
+burn-and-redeem:
+	@echo "Burning DSC and redeeming collateral..."
+	forge script script/Interactions.s.sol:BurnAndRedeem $(NETWORK_ARGS)
+
+# Check account information
+check-account:
+	@echo "Checking account information..."
+	forge script script/Interactions.s.sol:CheckAccountInfo --rpc-url http://localhost:8545
+
+# Set up liquidation scenario
+setup-liquidation:
+	@echo "Setting up liquidation scenario..."
+	forge script script/Interactions.s.sol:TestLiquidation $(NETWORK_ARGS)
+
+# Update prices (crash ETH price for liquidation testing)
+crash-price:
+	@echo "Crashing ETH price..."
+	forge script script/Interactions.s.sol:UpdatePrices $(NETWORK_ARGS)
+
+# Run tests
+test:
+	forge test -vvv
+
+# Test with gas report
+test-gas:
+	forge test --gas-report
+
+# Full demo sequence
+demo:
+	@echo "Running full DSC demo..."
+	@echo "1. Deploying contracts..."
+	make deploy
+	@echo "2. Depositing collateral and minting DSC..."
+	make deposit-and-mint
+	@echo "3. Checking account status..."
+	make check-account
+	@echo "4. Setting up for liquidation test..."
+	make setup-liquidation
+	@echo "Demo complete! Check the logs above."
+
+# Clean up
+clean:
+	forge clean
+
+# Show help
+help:
+	@echo "DSC Anvil Testing Commands:"
+	@echo ""
+	@echo "Setup:"
+	@echo "  make anvil              - Start Anvil local node (run in separate terminal)"
+	@echo "  make deploy             - Deploy DSC contracts"
+	@echo ""
+	@echo "Basic Operations:"
+	@echo "  make deposit-and-mint   - Deposit collateral and mint DSC"
+	@echo "  make deposit            - Only deposit collateral"
+	@echo "  make mint               - Only mint DSC (needs existing collateral)"
+	@echo "  make burn-and-redeem    - Burn DSC and redeem collateral"
+	@echo ""
+	@echo "Monitoring:"
+	@echo "  make check-account      - Check account balances and health factor"
+	@echo ""
+	@echo "Liquidation Testing:"
+	@echo "  make setup-liquidation  - Create over-leveraged position"
+	@echo "  make crash-price        - Crash ETH price to trigger liquidation"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test               - Run forge tests"
+	@echo "  make test-gas           - Run tests with gas report"
+	@echo ""
+	@echo "Shortcuts:"
+	@echo "  make demo               - Run complete demo sequence"
+	@echo "  make clean              - Clean build artifacts"
+
+.PHONY: anvil deploy deposit-and-mint deposit mint burn-and-redeem check-account setup-liquidation crash-price test test-gas demo clean help

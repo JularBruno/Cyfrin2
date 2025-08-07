@@ -114,3 +114,13 @@ price feed should be between and we found that with invariant tests
 
 #### Finished Section 3
 https://lens.xyz/ very useful for governance and make some social app
+
+https://docs.soliditylang.org/en/latest/natspec-format.html 
+NatSpec Format essential guide for clean solidity programming 
+
+### 
+
+forge script script/DeployDSC.s.sol:DeployDSC --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --rpc-url http://localhost:8545
+cast call 0x0165878A594ca255338adfa4d48449f69242Eb8F "getLiquidationThreshold()(uint256)" --rpc-url http://localhost:8545
+
+cast call 0x0165878A594ca255338adfa4d48449f69242Eb8F "getCollateralTokens()(address[])" --rpc-url http://localhost:8545
