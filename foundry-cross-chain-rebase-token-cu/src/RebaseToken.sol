@@ -33,6 +33,7 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract RebaseToken is ERC20 {
     error RebaseToken__InterestRateCanOnlyDecrease(uint256 oldInterestRate, uint256 newInterestRate);
 
+    uint256 private constant PRECISION_FACTOR = 1e18; // 18 decimal precision
     uint256 private s_interestRate = 5e10; // 5% or 0.05 // also private can be accessed when really specified
     mapping(address => uint256) private s_userInterestRate; // KEEP TRACK on mint, of user interest rate
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
@@ -57,7 +58,9 @@ contract RebaseToken is ERC20 {
     }
 
     /**
-     * 
+     * @notice Mint the user tokens when they deposit into vault
+     * @param _to the user to mint the tokens to
+     * @param _amount the amount of tokens to mint
      */
     function mint(address _to, uint256 _amount) external {
         _mintAccruedInterest(_to);
@@ -66,15 +69,47 @@ contract RebaseToken is ERC20 {
 
     }
 
+    /**
+     * @notice Calculate the balance for the user including the interest that has accumulated since the last update
+     * (principal balance) + some interest that has accrued
+     * @param _user The address to calculate the balance of
+     * @return balance of the user including interest
+     */
     function balanceOf(address _user) public view override returns(uint256) {
         // get the current principal balance (number of tokens that have actually been minted) (mapping balances of ERC20)
+        // multiyplye the principle balance by the interest rate that is accrued
+        // s_interestRate runs per second meaning 0.000000005% is increasing in your balance per second!!!
+    
+        // balanceof and _calculate are both 1e18 so multiplication ends in 1e36, thats why we divide
+        return balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR; // this is cool to remmember, for better precision keep * and / together and clean
+    }
+
+    /**
+     * @notice Calculate the interest that has accrued since the last update
+     * @param _user The user to calculate the interest accumulated for
+     * @return linearInterest interest that has accrued since the last update
+     */
+    function _calculateUserAccumulatedInterestSinceLastUpdate(address _user) internal view returns(uint256 linearInterest) {
+        // calculate the interest that has accrued since the last update
+        // This is going to be linear growth with time
+        // 1. calculate the time since the last update
+        // 2. calculate the amount of linear growth
+        // (principal amount) + (principal amount * user interest rate * time elapsed)
+        // deposit: 10 tokens
+        // interest rate 0.5 tokens per second
+        // time elapsed: 2 seconds
+        // 10 + (10 * 0.5 * 2)
+
+        uint256 timeElapsed = block.timestamp - s_userLastUpdatedTimestamp[_user];
+        // principal amount(1 + (user interest rate * time elapsed) )
+        linearInterest = PRECISION_FACTOR + (s_userInterestRate[_user] * timeElapsed); // 18 decimal precision
     }
 
     /**
      * 
-     * @param _user 
+     * @param _user asd
      */
-    function _mintAccruedInterest(address user) internal {
+    function _mintAccruedInterest(address _user) internal {
         // (1) find their current balance of the rebase tokens that have been minted to the user -> principal balance
         // (2) calculate their current balance including any interest -> balanceOf
         // calculate the number of tokens that need to be minted to the -> user (2 actual balance of rebase token their are entitled to) - (1)
