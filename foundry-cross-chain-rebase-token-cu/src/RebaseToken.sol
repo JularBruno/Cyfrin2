@@ -46,7 +46,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     
     // deployer calls constructor so that will be the owner
     constructor() ERC20("Rebase Token", "RBT") Ownable(msg.sender) { // owneable could be different with admin roles
-        // deploy token, vault, and the cross chain functionality don't allow to set roles to addresses on constructor, mostly because security
+        
     }
 
     function grantBurnAndMintRole(address _account) external onlyOwner {

@@ -58,5 +58,11 @@ forge install openzeppelin/openzeppelin-contracts@v5.1.0
 
 OpenZeppelin has `AccessControl` contract for fine-grained, role-based permissions.
 - Allows to grant, revoke, get role addresses for different addressses
-- There is a setAdmin 
-- onlyRole modifier
+- There is a setAdmin! Ideal for prod contracts it makes more sense. The RebaseToken.sol has another structure
+- onlyRole modifier to allow access to functions only be specified role
+- deploy token, vault, and the cross chain functionality don't allow to set roles to addresses on constructor, mostly because security
+
+### Vault And-natspec
+
+Where users deposit their ETH and withdraw their ETH. Lockup all ETH in one place.
+
