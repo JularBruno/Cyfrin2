@@ -53,3 +53,10 @@ By adjusting supply rather than price to reflect value changes or distribute rew
 
 Should make some make file at least with the install
 forge install openzeppelin/openzeppelin-contracts@v5.1.0
+
+### Access Control
+
+OpenZeppelin has `AccessControl` contract for fine-grained, role-based permissions.
+- Allows to grant, revoke, get role addresses for different addressses
+- There is a setAdmin 
+- onlyRole modifier

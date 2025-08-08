@@ -22,6 +22,8 @@ pragma solidity ^0.8.24;
 // view & pure functions
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @title RebaseToken
@@ -30,18 +32,25 @@ import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * @notice The interest rate in the smart contract can only decrease 
  * @notice Each will user will have their own interest rate that is the global interest rate at the time of depositing.
 */
-contract RebaseToken is ERC20 {
+contract RebaseToken is ERC20, Ownable, AccessControl {
     error RebaseToken__InterestRateCanOnlyDecrease(uint256 oldInterestRate, uint256 newInterestRate);
 
     uint256 private constant PRECISION_FACTOR = 1e18; // 18 decimal precision
+    bytes32 private constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE"); // this how you create a role
     uint256 private s_interestRate = 5e10; // 5% or 0.05 // also private can be accessed when really specified
+    
     mapping(address => uint256) private s_userInterestRate; // KEEP TRACK on mint, of user interest rate
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
 
     event InterestRateSet(uint256 newInterestRate);
     
-    constructor() ERC20("Rebase Token", "RBT") {
+    // deployer calls constructor so that will be the owner
+    constructor() ERC20("Rebase Token", "RBT") Ownable(msg.sender) { // owneable could be different with admin roles
+        // deploy token, vault, and the cross chain functionality don't allow to set roles to addresses on constructor, mostly because security
+    }
 
+    function grantBurnAndMintRole(address _account) external onlyOwner {
+        _grantRole(MINT_AND_BURN_ROLE, _account); // this is centralized, known issue. The owner can grant mint and burn to anyone.
     }
 
     /**
@@ -49,7 +58,7 @@ contract RebaseToken is ERC20 {
      * @param _newInterestRate The new interest rate to set
      * @dev the interest rate can only decrease
      */
-    function setInterestRate(uint256 _newInterestRate) external {
+    function setInterestRate(uint256 _newInterestRate) external onlyOwner { // onlyOwner can set interest rate
         if(_newInterestRate < s_interestRate) {
             revert RebaseToken__InterestRateCanOnlyDecrease(s_interestRate ,_newInterestRate);
         }
@@ -62,7 +71,7 @@ contract RebaseToken is ERC20 {
      * @param _to the user to mint the tokens to
      * @param _amount the amount of tokens to mint
      */
-    function mint(address _to, uint256 _amount) external {
+    function mint(address _to, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
         _mintAccruedInterest(_to);
         s_userInterestRate[_to] = s_interestRate;
         _mint(_to, _amount);
@@ -73,7 +82,7 @@ contract RebaseToken is ERC20 {
      * @param _from the user to burn the tokens from
      * @param _amount the amount of tokens to burn
      */
-    function burn(address _from, uint256 _amount) external {
+    function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
     // burn for bridging to another token!!! also for when user redeeming or depositing
         
         if(_amount == type(uint256).max) { // mititgate against DUST, leftover accrued tokens
