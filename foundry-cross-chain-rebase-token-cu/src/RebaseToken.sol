@@ -66,7 +66,22 @@ contract RebaseToken is ERC20 {
         _mintAccruedInterest(_to);
         s_userInterestRate[_to] = s_interestRate;
         _mint(_to, _amount);
+    }
 
+    /**
+     * @notice Burn the user tokens when they withdraw from vault
+     * @param _from the user to burn the tokens from
+     * @param _amount the amount of tokens to burn
+     */
+    function burn(address _from, uint256 _amount) external {
+    // burn for bridging to another token!!! also for when user redeeming or depositing
+        
+        if(_amount == type(uint256).max) { // mititgate against DUST, leftover accrued tokens
+            _amount = balanceOf(_from); // this is to actually redeem all balance of the user
+        }
+        _mintAccruedInterest(_from);
+        _burn(_from, _amount);
+        
     }
 
     /**
@@ -81,7 +96,10 @@ contract RebaseToken is ERC20 {
         // s_interestRate runs per second meaning 0.000000005% is increasing in your balance per second!!!
     
         // balanceof and _calculate are both 1e18 so multiplication ends in 1e36, thats why we divide
-        return balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR; // this is cool to remmember, for better precision keep * and / together and clean
+        return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR; // this is cool to remmember, for better precision keep * and / together and clean
+
+        // the line above shows good example of using the super keyword
+        // the function above, mint() is creating a different function so no super keyword 
     }
 
     /**
@@ -106,19 +124,23 @@ contract RebaseToken is ERC20 {
     }
 
     /**
-     * 
-     * @param _user asd
+     * @notice Mint the accrued interest to the user since the last time they interacted with the protcol (eg. burn, mint, transfer)
+     * @param _user The user to mint the accrued interest to
      */
     function _mintAccruedInterest(address _user) internal {
         // (1) find their current balance of the rebase tokens that have been minted to the user -> principal balance
+        uint256 previousPrincipleBalance = super.balanceOf(_user);
         // (2) calculate their current balance including any interest -> balanceOf
+        uint256 currentBalance = balanceOf(_user);
         // calculate the number of tokens that need to be minted to the -> user (2 actual balance of rebase token their are entitled to) - (1)
-        // call _mint to mint the tokens to the user
+        uint256 balanceIncrease = currentBalance - previousPrincipleBalance;
         // set users latest update timestamp in accrued interest
-
         s_userLastUpdatedTimestamp[_user] = block.timestamp;
+        // call _mint to mint the tokens to the user
+        _mint(_user, balanceIncrease); // _mint EMITS an event already
 
 
+        // this follow properly checks - effects (there isnt)- interactions
     }
 
     ///////////
