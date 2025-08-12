@@ -35,10 +35,14 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 contract RebaseToken is ERC20, Ownable, AccessControl {
     error RebaseToken__InterestRateCanOnlyDecrease(uint256 oldInterestRate, uint256 newInterestRate);
 
-    uint256 private constant PRECISION_FACTOR = 1e18; // 18 decimal precision
+    uint256 private constant PRECISION_FACTOR = 1e18; // 1e18 18 decimal precision, improved tolerance to 27 
+    // rediud 1e18 because of overflow, higly precision 
     bytes32 private constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE"); // this how you create a role
-    uint256 private s_interestRate = 5e10; // 5% or 0.05 // also private can be accessed when really specified
     
+    uint256 private s_interestRate = (5 * PRECISION_FACTOR) / 1e8; // 5% or 0.05 // also private can be accessed when really specified
+    // s_interestRate = 5e10 was leaving wei out when calculating interest because of precision
+    // 10^-8 == 1/ 10^8
+
     mapping(address => uint256) private s_userInterestRate; // KEEP TRACK on mint, of user interest rate
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
 
@@ -59,7 +63,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @dev the interest rate can only decrease
      */
     function setInterestRate(uint256 _newInterestRate) external onlyOwner { // onlyOwner can set interest rate
-        if(_newInterestRate < s_interestRate) {
+        if(_newInterestRate >= s_interestRate) {
             revert RebaseToken__InterestRateCanOnlyDecrease(s_interestRate ,_newInterestRate);
         }
         s_interestRate = _newInterestRate;
@@ -85,12 +89,24 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
     // burn for bridging to another token!!! also for when user redeeming or depositing
         
-        if(_amount == type(uint256).max) { // mititgate against DUST, leftover accrued tokens
-            _amount = balanceOf(_from); // this is to actually redeem all balance of the user
-        }
+        // if(_amount == type(uint256).max) { // mititgate against DUST, leftover accrued tokens
+        //     _amount = balanceOf(_from); // this is to actually redeem all balance of the user
+        // } // removed because added to interface
+
         _mintAccruedInterest(_from);
         _burn(_from, _amount);
         
+    }
+
+    /**
+     * @dev returns the principal balance of the user. The principal balance is the last
+     * updated stored balance, which does not consider the perpetually accruing interest that has not yet been minted.
+     * @param _user the address of the user
+     * @return the principal balance of the user
+     *
+     */
+    function principalBalanceOf(address _user) external view returns (uint256) {
+        return super.balanceOf(_user);
     }
 
     /**
@@ -109,6 +125,49 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
 
         // the line above shows good example of using the super keyword
         // the function above, mint() is creating a different function so no super keyword 
+    }
+
+    /**
+     * @dev transfers tokens from the sender to the recipient. This function also mints any accrued interest since the last time the user's balance was updated.
+     * @param _recipient the address of the recipient
+     * @param _amount the amount of tokens to transfer
+     * @return true if the transfer was successful
+     *
+     */
+    function transfer(address _recipient, uint256 _amount) public override returns (bool) {
+        // accumulates the balance of the user so it is up to date with any interest accumulated.
+        if (_amount == type(uint256).max) {
+            _amount = balanceOf(msg.sender);
+        }
+        _mintAccruedInterest(msg.sender);
+        _mintAccruedInterest(_recipient);
+        if (balanceOf(_recipient) == 0) {
+            // Update the users interest rate only if they have not yet got one (or they tranferred/burned all their tokens). Otherwise people could force others to have lower interest.
+            s_userInterestRate[_recipient] = s_userInterestRate[msg.sender];
+        }
+        return super.transfer(_recipient, _amount);
+    }
+
+     /**
+     * @dev transfers tokens from the sender to the recipient. This function also mints any accrued interest since the last time the user's balance was updated.
+     * @param _sender the address of the sender
+     * @param _recipient the address of the recipient
+     * @param _amount the amount of tokens to transfer
+     * @return true if the transfer was successful
+     *
+     */
+    function transferFrom(address _sender, address _recipient, uint256 _amount) public override returns (bool) {
+        if (_amount == type(uint256).max) {
+            _amount = balanceOf(_sender);
+        }
+        // accumulates the balance of the user so it is up to date with any interest accumulated.
+        _mintAccruedInterest(_sender);
+        _mintAccruedInterest(_recipient);
+        if (balanceOf(_recipient) == 0) {
+            // Update the users interest rate only if they have not yet got one (or they tranferred/burned all their tokens). Otherwise people could force others to have lower interest.
+            s_userInterestRate[_recipient] = s_userInterestRate[_sender];
+        }
+        return super.transferFrom(_sender, _recipient, _amount);
     }
 
     /**
@@ -155,6 +214,15 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     ///////////
     // view & pure functions
     ///////////
+
+    /**
+     * @dev returns the global interest rate of the token for future depositors
+     * @return s_interestRate
+     *
+     */
+    function getInterestRate() external view returns (uint256) {
+        return s_interestRate;
+    }
 
     /**
      * @notice Get the interest rate of a user

@@ -66,3 +66,5 @@ OpenZeppelin has `AccessControl` contract for fine-grained, role-based permissio
 
 Where users deposit their ETH and withdraw their ETH. Lockup all ETH in one place.
 
+### Rebase Token Tests Part 1
+- Should make unit tests, then integration tests to test scripts and everything, and then the fuzz tests. This projects holds them all together but is not a good practice.

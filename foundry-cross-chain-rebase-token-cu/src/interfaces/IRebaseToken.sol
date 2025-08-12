@@ -5,4 +5,5 @@ interface IRebaseToken {
 
     function mint(address _to, uint256 _amount) external; // fuinctions interface need to be external
     function burn(address _from, uint256 _amount) external;
+    function balanceOf(address _account) external view returns(uint256);
 }
