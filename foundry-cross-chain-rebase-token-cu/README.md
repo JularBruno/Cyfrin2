@@ -68,3 +68,31 @@ Where users deposit their ETH and withdraw their ETH. Lockup all ETH in one plac
 
 ### Rebase Token Tests Part 1
 - Should make unit tests, then integration tests to test scripts and everything, and then the fuzz tests. This projects holds them all together but is not a good practice.
+
+### Vulnerabilities and Cross-chain Intro
+The balanceOf shows a vulnerability, it has a compound interest that is not linear anymore as expected when user mints or burns. This is why this is a demo.
+
+Cross-chain has a token standard in chainlink, mostly to be approved by the chains.
+
+### Bridging
+
+Literal brdige between chains that allows transfering anything like data, assets, tokens, NFTs, ETC. 
+Gas fees to pay for transaction required, equally as having to pay in $pounds or $usds.
+
+- bridging: The transfer of assets crosschain
+- cross-chain messaging: any arbitrary data, it could be tokens like bridging but actually any data.
+
+HOw does it work?
+1. Burn and mint: total supply constant between chains
+2. lock and unlock: vualts that have both tokens,leads to fragmented liquidity
+3. lock and mint: locked tokens on source chain, and minted on destination chain eg USDC.e wrapped Basically an IOU
+4. burn and unlock: reverse of lock and mint, burned on source and minted on destination
+
+Avoid scentraliced bridges. trust entity to manage assets
+
+- Descentralized bridges: trust minimized bridges. rely on network of people. 
+- Chainlink ccip: move found through collection of descentrilized nodes. If node fails it is punished.
+- native bridges: secure because of dveloped by platform team like zksync that build and manages the chain. slow.
+- third party bridges: like arbiutrum, independently developed, liquidity pools, instalty get values in other side, high fees for paying for the provider. examples: ccip transporter, portal.
+- cross chain is insecure, it probably should be multi chain. It is extremely used nevertheless. Expose your chain to audits to test it properly.
+

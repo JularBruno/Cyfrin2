@@ -122,17 +122,18 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     
         // balanceof and _calculate are both 1e18 so multiplication ends in 1e36, thats why we divide
         return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR; // this is cool to remmember, for better precision keep * and / together and clean
+        // this is wrong, it has a compound interest that is not linear anymore as expected when user mints or burns. This is why this is a demo
 
         // the line above shows good example of using the super keyword
         // the function above, mint() is creating a different function so no super keyword 
     }
 
     /**
+     * @notice found bug while doing tests but it later explains about the exploits of not having this function
      * @dev transfers tokens from the sender to the recipient. This function also mints any accrued interest since the last time the user's balance was updated.
      * @param _recipient the address of the recipient
      * @param _amount the amount of tokens to transfer
      * @return true if the transfer was successful
-     *
      */
     function transfer(address _recipient, uint256 _amount) public override returns (bool) {
         // accumulates the balance of the user so it is up to date with any interest accumulated.
