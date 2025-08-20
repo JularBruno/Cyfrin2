@@ -96,3 +96,101 @@ Avoid scentraliced bridges. trust entity to manage assets
 - third party bridges: like arbiutrum, independently developed, liquidity pools, instalty get values in other side, high fees for paying for the provider. examples: ccip transporter, portal.
 - cross chain is insecure, it probably should be multi chain. It is extremely used nevertheless. Expose your chain to audits to test it properly.
 
+### CCIP
+
+The Internet of Contracts
+Different blockchains can interoperate securely and reliably. At its core, CCIP is a decentralized framework meticulously designed 
+for secure cross-chain messaging. There were many rekt 
+
+Basically bridging, descentralized, with specified nodes for defense 
+
+Defense-in-depth security:
+- off-chain rmn operations: one per blockchain mantaining group of nodes
+- blessing: check source and destionation chain for matching messages
+- cursing: detects anomaly and blocks the effected lane
+- lane: pathway between source and destination chain, unidirectional
+- token pools: abstractions of erc20, for minitng and burning or locking unlocking, and sets a rate limit (refill time and token )
+- cct standard: create token and pools
+
+the full CCIP graphic on the course displayed the path a transaction goes trhough
+
+https://docs.chain.link/ccip/tutorials/evm/send-arbitrary-data
+on course we did cool demostration on how to deploy contract and literally send data to eth from sepolia
+
+### The CCT Standard
+
+Enables developers to easily integrate tokens with CCIP, permissionles, keeping custody and control of token and pools
+
+Reasons for this standard:
+1. liquidity fragmentation: deploy token on chains and share liquidity
+2. Token developer autonomy: integrate token without permission for a third party. 
+3. programmable token transfers: send tokens and a message cross chain, useful for complex. requires locked liquidity.
+
+Arquitecture:
+- token contract: erc20 functionality
+- token pool: logic for sending cross chain (stores logic for bridging). Also executes cross chain token transfers, does the bruning/locking and mintin/unlocking
+- RegistryModuleOwnerCUstom: token admin
+- TokenAdminRegistry: ccip enabled tokens 
+
+Quick demo on building token and registering it.
+VERY COOL ONE could attempt from ccip basic contract create one like the cyfrin repo:
+- The last two Arquitecture above I think are for this project since it handles ccip setAdmin with owneable acceptAdminRol
+- The Cuorse shows from basic like build and env required, to deploying both contracts in different chains
+- burn and mint both in Sepolia and Arbitrum Sepolia
+- setpool links tokens with pool enabling cross chain by setting remote token address
+- You prepare a message for destionation
+- Inspect transaction details on ccip chainlink
+https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-lock-mint-foundry
+https://github.com/Cyfrin/ccip-cct-starter
+
+### Circle CCTP
+
+Well this is for using USDC as a Standard protcol to solve Cross-Chain main issues. It allow to really track USDC liquidity everywhere. It basically sets a protcol for not having a wrapped token (that should be USDC.e) in each different chain acting as an IOU.
+
+Mechanism: Instead of locking USDC and minting a wrapped IOU, CCTP facilitates the burning (destruction) of native USDC on the source chain. Once this burn event is verified and finalized, an equivalent amount of native USDC is minted (created) directly on the destination chain.
+
+Advantages of CCTP:
+- Native Assets, No Wrapped Tokens: Users always interact with and hold native USDC, issued by Circle, on all supported chains. This completely eliminates the risks associated with wrapped tokens and their underlying collateral.
+- Unified Liquidity: By ensuring only native USDC exists across chains, CCTP prevents liquidity fragmentation, leading to deeper and more efficient markets.
+- Enhanced Security: CCTP relies on Circle's robust Attestation Service to authorize minting
+- Permissionless Integration
+
+Core Components of CCTP
+
+- Circle's Attestation Service: This is a critical off-chain service operated by Circle. It acts like a secure, decentralized notary. The Attestation Service monitors supported blockchains for USDC burn events initiated via CCTP. After a burn event occurs and reaches the required level of finality on the source chain, the service issues a cryptographically signed message, known as an attestation. This attestation serves as a verifiable authorization for the minting of an equivalent amount of USDC on the specified destination chain.
+- Finality (Hard vs. Soft)
+- Fast Transfer Allowance (CCTP V2): This feature, part of CCTP V2, is an over-collateralized reserve buffer of USDC managed by Circle. When a Fast Transfer is initiated, the minting on the destination chain can occur after only soft finality on the source chain.
+- this is like the core of the code !!! Message Passing: CCTP incorporates sophisticated and secure protocols for passing messages between chains. These messages include details of the burn event and, crucially, the attestation from Circle's Attestation Service that authorizes the minting on the destination chain.
+
+1. Standard Transfer (V1 & V2 - Uses Hard Finality)
+
+This method prioritizes the highest level of security by waiting for hard finality on the source chain.
+- Basically emit attestation and receive attestation on chains
+
+Step 5: Completion: The MessageTransmitter contract on the destination chain verifies the authenticity and validity of the attestation. Upon successful verification, it mints the equivalent amount of native USDC directly to the specified recipient address on the destination chain.
+
+When to Use Standard Transfer: Ideal when reliability and security are paramount, and waiting approximately 13+ minutes for hard finality is acceptable. This method generally incurs lower fees compared to Fast Transfers.
+
+2. Fast Transfer (V2 - Uses Soft Finality)
+
+This method, available in CCTP V2, prioritizes speed by leveraging soft finality and the Fast Transfer Allowance.
+- Allows minting before real burning
+Step 5: Mint Event: The application fetches the (sooner available) attestation and submits it to the MessageTransmitter contract on the destination chain. The fee for the fast transfer is collected at this stage.
+Step 6: Fast Transfer Allowance Replenishment: Once hard finality is eventually reached for the original burn transaction on the source chain, Circle's Fast Transfer Allowance is credited back or replenished.
+Step 7: Completion: The recipient receives native USDC on the destination chain much faster, typically within seconds.
+
+When to Use Fast Transfer: Best suited for use cases where speed is critical and the user/application cannot wait for hard finality. Note that this method incurs an additional fee for leveraging the Fast Transfer Allowance. (As of the video's recording, CCTP V2 and Fast Transfers were primarily available on testnet).
+
+##### Ethersjs example:
+approve, burn, retrieve message, fetch attestation
+receivev funs with attestation sighanture and message
+cctp-vi-ethersjs
+Transfer usdc on testnet From Ethereum to Avalanche
+
+##### Minting allowence
+Basically need to ask circle for more amount. TokenMinter
+
+##### Advantages
+- Fast cross chain rebalancing
+- Composable cross chain swaps
+- Simplify cross-chain complexities
