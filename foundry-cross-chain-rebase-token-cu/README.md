@@ -183,7 +183,7 @@ When to Use Fast Transfer: Best suited for use cases where speed is critical and
 
 ##### Ethersjs example:
 approve, burn, retrieve message, fetch attestation
-receivev funs with attestation sighanture and message
+receive funds with attestation sighanture and message
 cctp-vi-ethersjs
 Transfer usdc on testnet From Ethereum to Avalanche
 
