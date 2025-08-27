@@ -37,7 +37,8 @@ contract Vault {
         // 2. emit event
 
         // interface is required here IRebaseToken(i_rebaseToken)
-        i_rebaseToken.mint(msg.sender, msg.value); // message.value gets te value of the msg.sender transaction!!!
+        uint256 interestRate = i_rebaseToken.getInterestRate();
+        i_rebaseToken.mint(msg.sender, msg.value, interestRate); // message.value gets te value of the msg.sender transaction!!!
         // we can mint when bridging
         emit Deposit(msg.sender, msg.value);
     }

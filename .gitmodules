@@ -52,3 +52,6 @@
 [submodule "foundry-cross-chain-rebase-token-cu/lib/openzeppelin-contracts"]
 	path = foundry-cross-chain-rebase-token-cu/lib/openzeppelin-contracts
 	url = https://github.com/openzeppelin/openzeppelin-contracts
+[submodule "foundry-cross-chain-rebase-token-cu/lib/ccip"]
+	path = foundry-cross-chain-rebase-token-cu/lib/ccip
+	url = https://github.com/smartcontractkit/ccip

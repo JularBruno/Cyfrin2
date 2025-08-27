@@ -194,3 +194,9 @@ Basically need to ask circle for more amount. TokenMinter
 - Fast cross chain rebalancing
 - Composable cross chain swaps
 - Simplify cross-chain complexities
+
+### Pool Contract
+
+forge install smartcontractkit/ccip@v2.17.0-ccip1.5.16
+
+rmnProxy is risk managemnt network where they check nothing malicious is happening
