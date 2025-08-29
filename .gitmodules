@@ -55,3 +55,6 @@
 [submodule "foundry-cross-chain-rebase-token-cu/lib/ccip"]
 	path = foundry-cross-chain-rebase-token-cu/lib/ccip
 	url = https://github.com/smartcontractkit/ccip
+[submodule "foundry-cross-chain-rebase-token-cu/lib/chainlink-local"]
+	path = foundry-cross-chain-rebase-token-cu/lib/chainlink-local
+	url = https://github.com/smartcontractkit/chainlink-local

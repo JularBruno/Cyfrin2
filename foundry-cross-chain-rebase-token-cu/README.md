@@ -191,6 +191,7 @@ Transfer usdc on testnet From Ethereum to Avalanche
 Basically need to ask circle for more amount. TokenMinter
 
 ##### Advantages
+
 - Fast cross chain rebalancing
 - Composable cross chain swaps
 - Simplify cross-chain complexities
@@ -200,3 +201,19 @@ Basically need to ask circle for more amount. TokenMinter
 forge install smartcontractkit/ccip@v2.17.0-ccip1.5.16
 
 rmnProxy is risk managemnt network where they check nothing malicious is happening
+
+### Chainlink Local and Fork Tests
+
+Can not only work on tesing different forks, but also block numbers, allowing testing failures or hacks. 
+
+For forking remmember to add toml rpc_endpoints, got them from alchemy. Just copied network from required for course abritrum sepolia and sepolia ethereum.
+
+*Chainlink Local* is an installable package that allows you to run Chainlink services locally. https://docs.chain.link/chainlink-local
+
+forge install smartcontractkit/chainlink-local@v0.2.5-beta.0
+
+### Deploy Token Test
+
+Based on the next chainlink tutorial on how to register burn and mint, we created the tests.
+
+https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-burn-mint-foundry
