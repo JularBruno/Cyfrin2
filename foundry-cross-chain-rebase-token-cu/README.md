@@ -217,3 +217,7 @@ forge install smartcontractkit/chainlink-local@v0.2.5-beta.0
 Based on the next chainlink tutorial on how to register burn and mint, we created the tests.
 
 https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-burn-mint-foundry
+
+
+#### CCIP Setup Test
+followed documentation but being applied to the test setUp. Use docs above.
