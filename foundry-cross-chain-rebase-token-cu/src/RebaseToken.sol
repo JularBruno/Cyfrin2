@@ -21,24 +21,24 @@ pragma solidity ^0.8.24;
 // private
 // view & pure functions
 
-import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 /**
  * @title RebaseToken
  * @author jular
  * @notice This is a cross-chain rebase token that incentivises users to deposit into a vault and gain interest in rewards.
- * @notice The interest rate in the smart contract can only decrease 
+ * @notice The interest rate in the smart contract can only decrease
  * @notice Each will user will have their own interest rate that is the global interest rate at the time of depositing.
-*/
+ */
 contract RebaseToken is ERC20, Ownable, AccessControl {
     error RebaseToken__InterestRateCanOnlyDecrease(uint256 oldInterestRate, uint256 newInterestRate);
 
-    uint256 private constant PRECISION_FACTOR = 1e18; // 1e18 18 decimal precision, improved tolerance to 27 
-    // rediud 1e18 because of overflow, higly precision 
+    uint256 private constant PRECISION_FACTOR = 1e18; // 1e18 18 decimal precision, improved tolerance to 27
+    // rediud 1e18 because of overflow, higly precision
     bytes32 private constant MINT_AND_BURN_ROLE = keccak256("MINT_AND_BURN_ROLE"); // this how you create a role
-    
+
     uint256 private s_interestRate = (5 * PRECISION_FACTOR) / 1e8; // 5% or 0.05 // also private can be accessed when really specified
     // s_interestRate = 5e10 was leaving wei out when calculating interest because of precision
     // 10^-8 == 1/ 10^8
@@ -47,10 +47,9 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
     mapping(address => uint256) private s_userLastUpdatedTimestamp;
 
     event InterestRateSet(uint256 newInterestRate);
-    
+
     // deployer calls constructor so that will be the owner
     constructor() ERC20("Rebase Token", "RBT") Ownable(msg.sender) { // owneable could be different with admin roles
-        
     }
 
     function grantBurnAndMintRole(address _account) external onlyOwner {
@@ -62,9 +61,10 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _newInterestRate The new interest rate to set
      * @dev the interest rate can only decrease
      */
-    function setInterestRate(uint256 _newInterestRate) external onlyOwner { // onlyOwner can set interest rate
-        if(_newInterestRate >= s_interestRate) {
-            revert RebaseToken__InterestRateCanOnlyDecrease(s_interestRate ,_newInterestRate);
+    function setInterestRate(uint256 _newInterestRate) external onlyOwner {
+        // onlyOwner can set interest rate
+        if (_newInterestRate >= s_interestRate) {
+            revert RebaseToken__InterestRateCanOnlyDecrease(s_interestRate, _newInterestRate);
         }
         s_interestRate = _newInterestRate;
         emit InterestRateSet(_newInterestRate);
@@ -87,15 +87,14 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _amount the amount of tokens to burn
      */
     function burn(address _from, uint256 _amount) external onlyRole(MINT_AND_BURN_ROLE) {
-    // burn for bridging to another token!!! also for when user redeeming or depositing
-        
+        // burn for bridging to another token!!! also for when user redeeming or depositing
+
         // if(_amount == type(uint256).max) { // mititgate against DUST, leftover accrued tokens
         //     _amount = balanceOf(_from); // this is to actually redeem all balance of the user
         // } // removed because added to interface
 
         _mintAccruedInterest(_from);
         _burn(_from, _amount);
-        
     }
 
     /**
@@ -115,17 +114,17 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _user The address to calculate the balance of
      * @return balance of the user including interest
      */
-    function balanceOf(address _user) public view override returns(uint256) {
+    function balanceOf(address _user) public view override returns (uint256) {
         // get the current principal balance (number of tokens that have actually been minted) (mapping balances of ERC20)
         // multiyplye the principle balance by the interest rate that is accrued
         // s_interestRate runs per second meaning 0.000000005% is increasing in your balance per second!!!
-    
+
         // balanceof and _calculate are both 1e18 so multiplication ends in 1e36, thats why we divide
         return super.balanceOf(_user) * _calculateUserAccumulatedInterestSinceLastUpdate(_user) / PRECISION_FACTOR; // this is cool to remmember, for better precision keep * and / together and clean
-        // this is wrong, it has a compound interest that is not linear anymore as expected when user mints or burns. This is why this is a demo
+            // this is wrong, it has a compound interest that is not linear anymore as expected when user mints or burns. This is why this is a demo
 
         // the line above shows good example of using the super keyword
-        // the function above, mint() is creating a different function so no super keyword 
+        // the function above, mint() is creating a different function so no super keyword
     }
 
     /**
@@ -149,7 +148,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
         return super.transfer(_recipient, _amount);
     }
 
-     /**
+    /**
      * @dev transfers tokens from the sender to the recipient. This function also mints any accrued interest since the last time the user's balance was updated.
      * @param _sender the address of the sender
      * @param _recipient the address of the recipient
@@ -176,7 +175,11 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @param _user The user to calculate the interest accumulated for
      * @return linearInterest interest that has accrued since the last update
      */
-    function _calculateUserAccumulatedInterestSinceLastUpdate(address _user) internal view returns(uint256 linearInterest) {
+    function _calculateUserAccumulatedInterestSinceLastUpdate(address _user)
+        internal
+        view
+        returns (uint256 linearInterest)
+    {
         // calculate the interest that has accrued since the last update
         // This is going to be linear growth with time
         // 1. calculate the time since the last update
@@ -208,7 +211,6 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
         // call _mint to mint the tokens to the user
         _mint(_user, balanceIncrease); // _mint EMITS an event already
 
-
         // this follow properly checks - effects (there isnt)- interactions
     }
 
@@ -229,8 +231,7 @@ contract RebaseToken is ERC20, Ownable, AccessControl {
      * @notice Get the interest rate of a user
      * @param _user The user to get the interest rate
      */
-    function getUserInterestRate(address _user) external view returns(uint256) {
+    function getUserInterestRate(address _user) external view returns (uint256) {
         return s_userInterestRate[_user];
     }
 }
-

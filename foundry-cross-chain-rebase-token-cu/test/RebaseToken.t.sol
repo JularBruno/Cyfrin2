@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import { Test, console } from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { IAccessControl } from "@openzeppelin/contracts/access/IAccessControl.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IAccessControl} from "@openzeppelin/contracts/access/IAccessControl.sol";
 
-import { RebaseToken } from "../src/RebaseToken.sol";
-import { Vault } from "../src/Vault.sol";
+import {RebaseToken} from "../src/RebaseToken.sol";
+import {Vault} from "../src/Vault.sol";
 
-import { IRebaseToken } from "../src/interfaces/IRebaseToken.sol";
+import {IRebaseToken} from "../src/interfaces/IRebaseToken.sol";
 
 contract RebaseTokenTest is Test {
-
     RebaseToken private rebaseToken;
     Vault private vault;
 
@@ -29,8 +28,9 @@ contract RebaseTokenTest is Test {
         vm.stopPrank();
     }
 
-    function addRewardsToVault(uint256 rewardAmount) public { // HELPER FUNCTION not a test
-        (bool success, ) = payable(address(vault)).call{ value: rewardAmount }("");
+    function addRewardsToVault(uint256 rewardAmount) public {
+        // HELPER FUNCTION not a test
+        (bool success,) = payable(address(vault)).call{value: rewardAmount}("");
     }
 
     function testDepositLinear(uint256 amount) public {
@@ -53,14 +53,14 @@ contract RebaseTokenTest is Test {
         // 4. warp the time again by the same amount and check the balance again
         vm.warp(block.timestamp + 1 hours);
         uint256 endBalance = rebaseToken.balanceOf(user);
-        console.log("endBalance", endBalance); 
+        console.log("endBalance", endBalance);
         assertGt(endBalance, middleBalance);
         // check linear interest
         assertApproxEqAbs(endBalance - middleBalance, middleBalance - startBalance, 1); // THIS FAILED because of precision factor!!!
         vm.stopPrank();
     }
 
-     function testRedeemStraightAway(uint256 amount) public {
+    function testRedeemStraightAway(uint256 amount) public {
         amount = bound(amount, 1e5, type(uint96).max);
         // 1. deposit
         vm.startPrank(user);
@@ -87,7 +87,7 @@ contract RebaseTokenTest is Test {
         vm.warp(block.timestamp + time);
         uint256 balanceAfterSomeTime = rebaseToken.balanceOf(user);
         // 2.b. Add rewards to vault. Refactored for helping rewards on fuzzing
-        
+
         vm.deal(owner, balanceAfterSomeTime - depositAmount); // add funds to owner
         vm.prank(owner);
         addRewardsToVault(balanceAfterSomeTime - depositAmount); // add just enough rewards as user will require
@@ -114,7 +114,7 @@ contract RebaseTokenTest is Test {
         address user2 = makeAddr("user2");
         uint256 userBalance = rebaseToken.balanceOf(user);
         uint256 user2Balance = rebaseToken.balanceOf(user2);
-        
+
         assertEq(userBalance, amount);
         assertEq(user2Balance, 0);
 
@@ -134,7 +134,6 @@ contract RebaseTokenTest is Test {
         // check the user interest rate has been inherited (5e10 not 4e10)
         assertEq(rebaseToken.getUserInterestRate(user), 5e10); // USER
         assertEq(rebaseToken.getUserInterestRate(user2), 5e10); // USER2
-
     }
 
     function testCannotSetInterestRate(uint256 newInterestRate) public {
@@ -177,5 +176,4 @@ contract RebaseTokenTest is Test {
         rebaseToken.setInterestRate(newInterestRate);
         assertEq(rebaseToken.getInterestRate(), initialInterestRate);
     }
-
 }
