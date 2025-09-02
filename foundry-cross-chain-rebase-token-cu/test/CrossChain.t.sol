@@ -19,8 +19,9 @@ import {IRouterClient} from "@ccip/contracts/src/v0.8/ccip/interfaces/IRouterCli
 import {IERC20} from "@ccip/contracts/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol"; // not the same interface from the token pool as IERC20 from oppenezeppelin
 
 contract CrossChainTest is Test {
-    address owner = makeAddr("owner"); // cant be constant!
+    address public owner = makeAddr("owner"); // cant be constant!
     address user = makeAddr("user"); // cant be constant!
+    uint256 SEND_VALUE = 1e5;
 
     uint256 sepoliaFork;
     uint256 arbSepoliaFork;
@@ -39,6 +40,8 @@ contract CrossChainTest is Test {
     Register.NetworkDetails arbSepoliaNetworkDetails;
 
     function setUp() public {
+        address[] memory allowlist = new address[](0);
+
         sepoliaFork = vm.createSelectFork("sepolia");
 
         arbSepoliaFork = vm.createFork("arb-sepolia");
@@ -60,7 +63,7 @@ contract CrossChainTest is Test {
         vault = new Vault(IRebaseToken(address(sepoliaToken)));
         sepoliaPool = new RebaseTokenPool(
             IERC20(address(sepoliaToken)),
-            new address[](0),
+            allowlist,
             sepoliaNetworkDetails.rmnProxyAddress,
             sepoliaNetworkDetails.routerAddress
         );
@@ -88,22 +91,35 @@ contract CrossChainTest is Test {
         arbSepoliaNetworkDetails = ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
 
         arbSepoliaToken = new RebaseToken();
+
+        console.log("dest rebase token address");
+        console.log(address(arbSepoliaToken));
+        
+
         arbSepoliaPool = new RebaseTokenPool(
             IERC20(address(arbSepoliaToken)),
-            new address[](0),
+            allowlist,
             arbSepoliaNetworkDetails.rmnProxyAddress,
             arbSepoliaNetworkDetails.routerAddress
         );
 
-        sepoliaToken.grantBurnAndMintRole(address(arbSepoliaPool));
+        console.log('before token admin registry'); // this was for catching a setup bug
+//         console.log("Token address:", address(arbSepoliaToken)); // ARB token, not sepolia
+//         console.log("RNM Proxy:", arbSepoliaNetworkDetails.rmnProxyAddress); // ARB details
+//         console.log("Router:", arbSepoliaNetworkDetails.routerAddress); // ARB details
+
+        arbSepoliaToken.grantBurnAndMintRole(address(arbSepoliaPool));
         // again check docs, this step 4 on chainlink ccip register-from-eoa-burn-mint-foundry
         RegistryModuleOwnerCustom(arbSepoliaNetworkDetails.registryModuleOwnerCustomAddress).registerAdminViaOwner(
             address(arbSepoliaToken)
         );
+
         TokenAdminRegistry(arbSepoliaNetworkDetails.tokenAdminRegistryAddress).acceptAdminRole(address(arbSepoliaToken));
         TokenAdminRegistry(arbSepoliaNetworkDetails.tokenAdminRegistryAddress).setPool(
-            address(arbSepoliaToken), address(arbSepoliaToken)
+            address(arbSepoliaToken), address(arbSepoliaPool)
         );
+        
+        vm.stopPrank();
 
         // before stoping prank and after configuring pools
         configureTokenPool(
@@ -120,7 +136,6 @@ contract CrossChainTest is Test {
             address(sepoliaPool),
             address(sepoliaToken)
         );
-        vm.stopPrank();
     }
 
     // local and remote selection
@@ -135,7 +150,7 @@ contract CrossChainTest is Test {
 
         // bytes[] memory remotePoolAddresses = new bytes[](1); // this was from course review if update really worked
         // remotePoolAddresses[0] = abi.encode(remotePool);
-
+        vm.startPrank(owner);
         TokenPool.ChainUpdate[] memory chainsToAdd = new TokenPool.ChainUpdate[](1);
 
         // struct ChainUpdate {
@@ -157,11 +172,13 @@ contract CrossChainTest is Test {
         });
 
         // TokenPool(localPool).applyChainUpdates(new uint64[](0), chainsToAdd);
-        vm.prank(owner);
+        // vm.prank(owner);
         TokenPool(localPool).applyChainUpdates(chainsToAdd);
+        vm.stopPrank();
+
     }
 
-    function bridgeToken(
+    function bridgeTokens(
         uint256 amountToBridge, uint256 localFork, uint256 remoteFork, 
         Register.NetworkDetails memory localNetworkDetails, Register.NetworkDetails memory remoteNetworkDetails, 
         RebaseToken localToken, RebaseToken remoteToken) 
@@ -182,12 +199,16 @@ contract CrossChainTest is Test {
             amount: amountToBridge
         });
 
+        IERC20 linkToken = IERC20(localNetworkDetails.linkAddress);
+        uint256 linkBalance = linkToken.balanceOf(address(this));
+        console.log("LINK balance:", linkBalance);
+
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(user),
             data: "",
             tokenAmounts: tokenAmounts,
             feeToken: localNetworkDetails.linkAddress, // we want this to be link tokens
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 0})) // we don't want a custom gasLimit // read docs because there is EVMExtraArgsV1 and EVMExtraArgsV2
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV2({gasLimit: 100_000, allowOutOfOrderExecution: false})) // have to pass custom gas limit for testing actually should be 0 // we don't want a custom gasLimit // read docs because there is EVMExtraArgsV1 and EVMExtraArgsV2
         });
         
         
@@ -210,8 +231,12 @@ contract CrossChainTest is Test {
         //
         // vm.stopPrank();
         //
+        console.log('is this the fork that doesnt work');
         vm.selectFork(remoteFork);
         vm.warp(block.timestamp + 20 minutes); // warp timestamp because it takes time to propagate
+
+    console.log("Remote token address:", address(remoteToken));
+    console.log("Remote token code size:", address(remoteToken).code.length);
 
         uint256 remoteBalanceBefore = remoteToken.balanceOf(user);
 
@@ -225,5 +250,17 @@ contract CrossChainTest is Test {
         assertEq(localUserInterestRate, remoteUserInterestRate);
         // assert interest rates
         //
+    }
+
+    function testBridgeAllTokens() public {
+        vm.selectFork(sepoliaFork);
+        vm.deal(user, SEND_VALUE);
+        
+        vm.prank(user);
+        Vault(payable(address(vault))).deposit{value: SEND_VALUE}(); // THIS GREAT line that has many concepts, first we want to deposit with an amount so we send value on the curly braces. then for the address of the vault, payable, we call the Vault for making a deposit
+
+        assertEq(sepoliaToken.balanceOf(user), SEND_VALUE); // balance of takes time irl
+
+        bridgeTokens(SEND_VALUE, sepoliaFork, arbSepoliaFork, sepoliaNetworkDetails, arbSepoliaNetworkDetails, sepoliaToken, arbSepoliaToken);
     }
 }

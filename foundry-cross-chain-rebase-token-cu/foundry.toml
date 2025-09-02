@@ -7,6 +7,7 @@ remappings = [
     '@ccip/=lib/ccip/',
     '@chainlink-local/=lib/chainlink-local/',
     ]
-rpc_endpoints = {sepolia-eth = "https://eth-sepolia.g.alchemy.com/v2/9Yi86zPO8rSrihsldwaChOAm-MvfKaPf", arb-sepolia="https://arb-sepolia.g.alchemy.com/v2/9Yi86zPO8rSrihsldwaChOAm-MvfKaPf"}
+
+rpc_endpoints = {sepolia = "https://eth-sepolia.g.alchemy.com/v2/9Yi86zPO8rSrihsldwaChOAm-MvfKaPf", arb-sepolia="https://arb-sepolia.g.alchemy.com/v2/9Yi86zPO8rSrihsldwaChOAm-MvfKaPf"}
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
