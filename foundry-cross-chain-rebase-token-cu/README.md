@@ -222,5 +222,7 @@ https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-
 #### CCIP Setup Test
 followed documentation but being applied to the test setUp. Use docs above.
 
-### Configure Pool Test
+#### Configure Pool Test
 Remmember local and remote selection are based on the env you are working, think of it for testing, your local is the one you will be using and remote is the one receiving.
+
+#### Bridge Function Test

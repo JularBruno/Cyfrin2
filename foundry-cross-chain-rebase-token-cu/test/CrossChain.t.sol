@@ -13,11 +13,14 @@ import {RegistryModuleOwnerCustom} from "@ccip/contracts/src/v0.8/ccip/tokenAdmi
 import {TokenAdminRegistry} from "@ccip/contracts/src/v0.8/ccip/tokenAdminRegistry/TokenAdminRegistry.sol";
 import {TokenPool} from "@ccip/contracts/src/v0.8/ccip/pools/TokenPool.sol";
 import {RateLimiter} from "@ccip/contracts/src/v0.8/ccip/libraries/RateLimiter.sol";
+import {Client} from "@ccip/contracts/src/v0.8/ccip/libraries/Client.sol";
+import {IRouterClient} from "@ccip/contracts/src/v0.8/ccip/interfaces/IRouterClient.sol";
 // remmember IERC20 from ccip is not the same one as chinlink contract for IERC20
 import {IERC20} from "@ccip/contracts/src/v0.8/vendor/openzeppelin-solidity/v4.8.3/contracts/token/ERC20/IERC20.sol"; // not the same interface from the token pool as IERC20 from oppenezeppelin
 
 contract CrossChainTest is Test {
     address owner = makeAddr("owner"); // cant be constant!
+    address user = makeAddr("user"); // cant be constant!
 
     uint256 sepoliaFork;
     uint256 arbSepoliaFork;
@@ -49,6 +52,11 @@ contract CrossChainTest is Test {
         vm.startPrank(owner);
 
         sepoliaToken = new RebaseToken();
+
+        console.log("source rebase token address");
+        console.log(address(sepoliaToken));
+        console.log("Deploying token pool on Sepolia");
+
         vault = new Vault(IRebaseToken(address(sepoliaToken)));
         sepoliaPool = new RebaseTokenPool(
             IERC20(address(sepoliaToken)),
@@ -74,6 +82,8 @@ contract CrossChainTest is Test {
         vm.selectFork(arbSepoliaFork);
 
         vm.startPrank(owner);
+
+        console.log("Deploying token on Arbitrum");
 
         arbSepoliaNetworkDetails = ccipLocalSimulatorFork.getNetworkDetails(block.chainid);
 
@@ -149,5 +159,71 @@ contract CrossChainTest is Test {
         // TokenPool(localPool).applyChainUpdates(new uint64[](0), chainsToAdd);
         vm.prank(owner);
         TokenPool(localPool).applyChainUpdates(chainsToAdd);
+    }
+
+    function bridgeToken(
+        uint256 amountToBridge, uint256 localFork, uint256 remoteFork, 
+        Register.NetworkDetails memory localNetworkDetails, Register.NetworkDetails memory remoteNetworkDetails, 
+        RebaseToken localToken, RebaseToken remoteToken) 
+    public {
+        vm.selectFork(localFork);
+        // vm.startPrank(user);
+
+        //   struct EVM2AnyMessage {
+        //     bytes receiver; // abi.encode(receiver address) for dest EVM chains
+        //     bytes data; // Data payload
+        //     EVMTokenAmount[] tokenAmounts; // Token transfers
+        //     address feeToken; // Address of feeToken. address(0) means you will send msg.value.
+        //     bytes extraArgs; // Populate this with _argsToBytes(EVMExtraArgsV2)
+        //   }
+        Client.EVMTokenAmount[] memory tokenAmounts = new Client.EVMTokenAmount[](1);
+        tokenAmounts[0] = Client.EVMTokenAmount({
+            token: address(localToken),
+            amount: amountToBridge
+        });
+
+        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
+            receiver: abi.encode(user),
+            data: "",
+            tokenAmounts: tokenAmounts,
+            feeToken: localNetworkDetails.linkAddress, // we want this to be link tokens
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV1({gasLimit: 0})) // we don't want a custom gasLimit // read docs because there is EVMExtraArgsV1 and EVMExtraArgsV2
+        });
+        
+        
+        uint256 fee = IRouterClient(localNetworkDetails.routerAddress).getFee(remoteNetworkDetails.chainSelector, message); // in order to use routerAddress contract we need to cast it
+        ccipLocalSimulatorFork.requestLinkFromFaucet(user, fee); // vm deal cheatcode!!! this why we required single lined pranks
+        vm.prank(user);
+        IERC20(localNetworkDetails.linkAddress).approve(localNetworkDetails.routerAddress, fee);
+        
+        vm.prank(user);
+        IERC20(address(localToken)).approve(localNetworkDetails.routerAddress, amountToBridge); // router address can approve local token
+        // 
+        uint256 localBalanceBefore = localToken.balanceOf(user);
+        //
+        vm.prank(user);
+        IRouterClient(localNetworkDetails.routerAddress).ccipSend(remoteNetworkDetails.chainSelector, message);
+        //
+        uint256 localBalanceAfter = localToken.balanceOf(user);
+        assertEq(localBalanceAfter, localBalanceBefore - amountToBridge);
+        uint256 localUserInterestRate = localToken.getUserInterestRate(user);
+        //
+        // vm.stopPrank();
+        //
+        vm.selectFork(remoteFork);
+        vm.warp(block.timestamp + 20 minutes); // warp timestamp because it takes time to propagate
+
+        uint256 remoteBalanceBefore = remoteToken.balanceOf(user);
+
+        ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork); // we could select fork
+
+        uint256 remoteBalanceAfter = remoteToken.balanceOf(user);
+        uint256 expectedBalance = remoteBalanceBefore + amountToBridge; // this because "stack too deep" error
+        assertEq(remoteBalanceAfter, expectedBalance);
+
+        uint256 remoteUserInterestRate = localToken.getUserInterestRate(user);
+        assertEq(localUserInterestRate, remoteUserInterestRate);
+        // assert interest rates
+        //
     }
 }
