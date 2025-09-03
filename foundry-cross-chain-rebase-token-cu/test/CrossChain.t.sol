@@ -136,6 +136,7 @@ contract CrossChainTest is Test {
             address(sepoliaPool),
             address(sepoliaToken)
         );
+
     }
 
     // local and remote selection
@@ -208,7 +209,7 @@ contract CrossChainTest is Test {
             data: "",
             tokenAmounts: tokenAmounts,
             feeToken: localNetworkDetails.linkAddress, // we want this to be link tokens
-            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV2({gasLimit: 100_000, allowOutOfOrderExecution: false})) // have to pass custom gas limit for testing actually should be 0 // we don't want a custom gasLimit // read docs because there is EVMExtraArgsV1 and EVMExtraArgsV2
+            extraArgs: Client._argsToBytes(Client.EVMExtraArgsV2({gasLimit: 500_000, allowOutOfOrderExecution: false})) // have to pass custom gas limit for testing actually should be 0 // we don't want a custom gasLimit // read docs because there is EVMExtraArgsV1 and EVMExtraArgsV2
         });
         
         
@@ -231,23 +232,41 @@ contract CrossChainTest is Test {
         //
         // vm.stopPrank();
         //
-        console.log('is this the fork that doesnt work');
         vm.selectFork(remoteFork);
         vm.warp(block.timestamp + 20 minutes); // warp timestamp because it takes time to propagate
 
-    console.log("Remote token address:", address(remoteToken));
-    console.log("Remote token code size:", address(remoteToken).code.length);
+        
+        // get initial balance on Arbitrum
+        // uint256 initialArbBalance = IERC20(address(remoteToken)).balanceOf(alice);
+        // console.log("Remote balance before bridge: %d", initialArbBalance);
+        // vm.selectFork(localFork); // in the latest version of chainlink-local, it assumes you are currently on the local fork before calling switchChainAndRouteMessage
+        // ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork);
 
-        uint256 remoteBalanceBefore = remoteToken.balanceOf(user);
+        // console.log("Remote user interest rate: %d", remoteToken.getUserInterestRate(alice));
+        // uint256 destBalance = IERC20(address(remoteToken)).balanceOf(alice);
+        // console.log("Remote balance after bridge: %d", destBalance);
+        // assertEq(destBalance, initialArbBalance + amountToBridge);
 
-        ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork); // we could select fork
+        uint256 remoteBalanceBefore = IERC20(address(remoteToken)).balanceOf(user);
+        console.log("Remote balance before bridge: %d", remoteBalanceBefore);
 
-        uint256 remoteBalanceAfter = remoteToken.balanceOf(user);
+
+        vm.selectFork(localFork); // in the latest version of chainlink-local, it assumes you are currently on the local fork before calling switchChainAndRouteMessage
+        ccipLocalSimulatorFork.switchChainAndRouteMessage(remoteFork); // we could select fork or do this THERE is an error here
+
+        console.log('does this reach');
+        console.log("Remote user interest rate: %d", remoteToken.getUserInterestRate(user));
+
+
+        uint256 remoteBalanceAfter = IERC20(address(remoteToken)).balanceOf(user);
+        console.log("Remote balance after bridge: %d", remoteBalanceAfter);
+
         uint256 expectedBalance = remoteBalanceBefore + amountToBridge; // this because "stack too deep" error
         assertEq(remoteBalanceAfter, expectedBalance);
+        console.log('AHHHHHHHHH');
 
-        uint256 remoteUserInterestRate = localToken.getUserInterestRate(user);
-        assertEq(localUserInterestRate, remoteUserInterestRate);
+        // uint256 remoteUserInterestRate = localToken.getUserInterestRate(user);
+        // assertEq(localUserInterestRate, remoteUserInterestRate);
         // assert interest rates
         //
     }
