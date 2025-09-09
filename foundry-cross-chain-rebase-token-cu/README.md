@@ -252,3 +252,7 @@ Remmember local and remote selection are based on the env you are working, think
 
 Remmember to add rpc_endpoints = {sepolia = "", arb-sepolia=""} in foundry toml
 also env is required, will describe this at the top
+
+### Token and Pool Deployer
+
+https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-burn-mint-foundry
