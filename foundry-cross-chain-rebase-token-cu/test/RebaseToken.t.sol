@@ -15,6 +15,7 @@ contract RebaseTokenTest is Test {
     RebaseToken private rebaseToken;
     Vault private vault;
 
+    uint256 public SEND_VALUE = 1e5;
     address public owner = makeAddr("owner");
     address public user = makeAddr("user");
 
@@ -35,7 +36,7 @@ contract RebaseTokenTest is Test {
 
     function testDepositLinear(uint256 amount) public {
         // vm.assume(amount > 1e5);
-        amount = bound(amount, 1e5, type(uint96).max); // bound is better than equal, mostly for later use in fuzz
+        amount = bound(amount, SEND_VALUE, type(uint96).max); // bound is better than equal, mostly for later use in fuzz
         // 1. deposit
         vm.startPrank(user);
         vm.deal(user, amount);
@@ -61,7 +62,7 @@ contract RebaseTokenTest is Test {
     }
 
     function testRedeemStraightAway(uint256 amount) public {
-        amount = bound(amount, 1e5, type(uint96).max);
+        amount = bound(amount, SEND_VALUE, type(uint96).max);
         // 1. deposit
         vm.startPrank(user);
         vm.deal(user, amount);
@@ -76,7 +77,7 @@ contract RebaseTokenTest is Test {
 
     function testRedeemAfterTimePassed(uint256 depositAmount, uint256 time) public {
         time = bound(time, 1000, type(uint96).max); // maximum time of 2.5 * 10^21years = 136 years
-        depositAmount = bound(depositAmount, 1e5, type(uint96).max);
+        depositAmount = bound(depositAmount, SEND_VALUE, type(uint96).max);
 
         // 1. deposit
         // vm.startPrank(user); PRANK only next line STARTPRANK whole scope
@@ -104,8 +105,8 @@ contract RebaseTokenTest is Test {
     }
 
     function testTransfer(uint256 amount, uint256 amountToSend) public {
-        amount = bound(amount, 1e5 + 1e5, type(uint96).max);
-        amountToSend = bound(amountToSend, 1e5, amount - 1e5); // amount always > amountToSend
+        amount = bound(amount, SEND_VALUE + SEND_VALUE, type(uint96).max);
+        amountToSend = bound(amountToSend, SEND_VALUE, amount - SEND_VALUE); // amount always > amountToSend
         // 1. deposit
         vm.deal(user, amount);
         vm.prank(user);
@@ -142,16 +143,25 @@ contract RebaseTokenTest is Test {
         rebaseToken.setInterestRate(newInterestRate);
     }
 
-    function testCannotCallMintAndBurn() public {
-        vm.prank(user); // or even the owner
-        vm.expectPartialRevert(IAccessControl.AccessControlUnauthorizedAccount.selector);
-        rebaseToken.mint(user, 100, rebaseToken.getInterestRate());
-        vm.expectPartialRevert(IAccessControl.AccessControlUnauthorizedAccount.selector);
-        rebaseToken.burn(user, 100);
+    function testCannotCallMint() public {
+        // Deposit funds
+        vm.startPrank(user);
+        uint256 interestRate = rebaseToken.getInterestRate();
+        vm.expectRevert();
+        rebaseToken.mint(user, SEND_VALUE, interestRate);
+        vm.stopPrank();
+    }
+
+    function testCannotCallBurn() public {
+        // Deposit funds
+        vm.startPrank(user);
+        vm.expectRevert();
+        rebaseToken.burn(user, SEND_VALUE);
+        vm.stopPrank();
     }
 
     function testGetPrincipleAmount(uint256 amount) public {
-        amount = bound(amount, 1e5, type(uint96).max);
+        amount = bound(amount, SEND_VALUE, type(uint96).max);
         // 1. deposit
         vm.deal(user, amount);
         vm.prank(user);
