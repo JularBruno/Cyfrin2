@@ -248,17 +248,24 @@ followed documentation but being applied to the test setUp. Use docs above.
 #### Configure Pool Test
 Remmember local and remote selection are based on the env you are working, think of it for testing, your local is the one you will be using and remote is the one receiving.
 
-### First Cross-chain Test
+#### First Cross-chain Test
 
 Remmember to add rpc_endpoints = {sepolia = "", arb-sepolia=""} in foundry toml
 also env is required, will describe this at the top
 
-### Token and Pool Deployer
+#### Token and Pool Deployer
 
 https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-burn-mint-foundry
 
-### Bridging Script
+#### Bridging Script
 
 Not going to build script for interaction, must be done with cast.
 With CCIP you can catch messages and react to them.
 
+#### Build Scripts
+
+Added to foundry.toml:
+
+via_ir = true
+
+it used not to work, but now is useful
