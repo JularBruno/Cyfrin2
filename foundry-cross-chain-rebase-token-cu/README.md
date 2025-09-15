@@ -256,3 +256,9 @@ also env is required, will describe this at the top
 ### Token and Pool Deployer
 
 https://docs.chain.link/ccip/tutorials/evm/cross-chain-tokens/register-from-eoa-burn-mint-foundry
+
+### Bridging Script
+
+Not going to build script for interaction, must be done with cast.
+With CCIP you can catch messages and react to them.
+
