@@ -269,3 +269,20 @@ Added to foundry.toml:
 via_ir = true
 
 it used not to work, but now is useful
+
+### Run Scripts on Testnet
+
+Added from faucet:
+Ethereum Sepolia Drips 25 LINK token address 0x779877A7B0D9E8603169DdbD7836e478b4624789 
+ZKsync Sepolia Drips 25 LINK token address 0x23A1aFD896c8c8876AF46aDc38521f4432658d1e
+
+Added to .env: ZKSYNC_SEPOLIA_RPC_URL since SEPOLIA_RPC_URL was already gotten from Alchemy before
+
+And we gonna use SH bridgeToZksync.sh since scripts dont work
+
+also had to create wallet account, called updraft in sh, so command is:
+cast wallet import updraft --interactive
+
+SH NOT WORKING many missmatches between versions i think, will review and deploy and then finish course
+
+### Cross-chain Message Success
