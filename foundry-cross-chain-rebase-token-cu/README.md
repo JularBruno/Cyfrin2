@@ -270,13 +270,13 @@ via_ir = true
 
 it used not to work, but now is useful
 
-### Run Scripts on Testnet
+## Run Scripts on Testnet
 
 Added from faucet:
 Ethereum Sepolia Drips 25 LINK token address 0x779877A7B0D9E8603169DdbD7836e478b4624789 
 ZKsync Sepolia Drips 25 LINK token address 0x23A1aFD896c8c8876AF46aDc38521f4432658d1e
 
-Added to .env: ZKSYNC_SEPOLIA_RPC_URL since SEPOLIA_RPC_URL was already gotten from Alchemy before
+Added to .env: ZKSYNC_SEPOLIA_RPC_URL since SEPOLIA_RPC_URL was already gotten from Alchemy before. Important add route with api key
 
 And we gonna use SH bridgeToZksync.sh since scripts dont work
 
@@ -285,4 +285,31 @@ cast wallet import updraft --interactive
 
 SH NOT WORKING many missmatches between versions i think, will review and deploy and then finish course
 
-### Cross-chain Message Success
+Lesson:
+- At the time of this lesson, Foundry scripts (forge script) and their associated cheatcodes (e.g., vm.startBroadcast(), vm.stopBroadcast()) do not function reliably on ZKsync Sepolia. This is due to incomplete cheatcode implementation within the Foundry ZKsync integration. Fork testing ZKsync also faces similar limitations.
+
+Unable to deploy on testnet
+
+You can check the message on the ccip chain of the transfer made.
+
+### Outro
+
+Chiara resumes the full developed code.
+
+Final quiz:
+
+1. Before an external smart contract (like a bridge or router) can programmatically transfer a specific amount of an ERC20 token owned by another address or contract, what standard action must typically be performed first?
+- The token owner must grant an allowance to the external contract, permitting it to spend the specified token amount on their behalf.
+
+2. During the execution of complex smart contract tests involving numerous internal calls or deep contract interactions, what type of execution limit might be encountered, often necessitating compiler optimizations or code refactoring?
+- Stack depth limit exceeded
+Good question — short answer: yes, often --via-ir is the fix for stack-too-deep errors.
+
+3. In Foundry tests, what does the `--via-ir` flag primarily address when running complex test suites?
+- Potential 'Stack Too Deep' errors by enabling code optimization during compilation.
+
+4. When configuring a `TokenPool` contract for cross-chain interaction with another `TokenPool` using CCIP, what information about the *remote* chain and pool is necessary?
+- The remote chain's unique CCIP selector and the encoded address of the remote `TokenPool` contract.
+
+5. When preparing a message payload for a CCIP message, how is the recipient's address formatted within the message structure?
+- 

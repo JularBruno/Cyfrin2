@@ -21,12 +21,12 @@ SEPOLIA_CHAIN_SELECTOR="16015286601757825753"
 SEPOLIA_LINK_ADDRESS="0x779877A7B0D9E8603169DdbD7836e478b4624789"
 
 # Compile and deploy the Rebase Token contract
-foundryup-zksync # USE ONCE for not having to type it on console
+# foundryup-zksync # USE ONCE for not having to type it on console
 source .env
 forge build --zksync
 echo "Compiling and deploying the Rebase Token contract on ZKsync..."
-echo " ZKSYNC_SEPOLIA_RPC_URL ${ZKSYNC_SEPOLIA_RPC_URL}"
-ZKSYNC_REBASE_TOKEN_ADDRESS=$(forge create src/RebaseToken.sol:RebaseToken --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} --account updraft --legacy --zksync | awk '/Deployed to:/ {print $3}')
+echo " ZKSYNC_SEPOLIA_RPC_URL $ZKSYNC_SEPOLIA_RPC_URL"
+ZKSYNC_REBASE_TOKEN_ADDRESS=$(forge create src/RebaseToken.sol:RebaseToken --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} --account updraft --broadcast --legacy --zksync | awk '/Deployed to:/ {print $3}')
 echo "ZKsync rebase token address: $ZKSYNC_REBASE_TOKEN_ADDRESS"
 
 # Compile and deploy the pool contract
