@@ -67,7 +67,7 @@ $ cast --help
 
 # Hola
 
-### For installing
+## For installing
 Project is inside git so created with `--no-git` flag and installing requires the same
 ```forge install openzeppelin/openzeppelin-contracts --no-git```
 
@@ -78,4 +78,8 @@ https://updraft.cyfrin.io/courses/advanced-foundry/merkle-airdrop/merkle-proofs
 Merkle Trees are just cryptographic data structured like a tree, having data as leaves, that generate a unique hash.
 We will use openzepelin merkletrees.sol and it will update the hash on array push.
 It will generate root and leaf to use Merkle Proof to check if leaf is in the tree.
-This can verify state changes in smart contracts or rollups, and be used to validate some keys data, and also
+This can verify state changes in smart contracts or rollups, and is used mostly to validate some keys data, very efficient hashing.
+tldr: Merkle proof prove data is in merkle tree
+
+### Base Airdrop Contract
+WE 

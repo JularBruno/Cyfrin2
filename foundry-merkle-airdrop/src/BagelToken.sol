@@ -10,7 +10,6 @@ contract BagelToken is ERC20, Ownable {
         // The initial supply will be managed by the owner minting tokens as needed,
         // rather than minting a fixed supply at deployment.
     }
-​	
 	// allowing the owner to mint tokens on demand
     function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
