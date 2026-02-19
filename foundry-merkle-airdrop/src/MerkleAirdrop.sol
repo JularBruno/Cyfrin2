@@ -16,10 +16,13 @@ contract MerkleAirdrop {
 	// State Variables
 	bytes32 private immutable i_merkleRoot;
 	IERC20 private immutable i_airdropToken;
+	mapping(address claimant => bool) private s_hasClaimed; //  Declaring a Mapping to Track Claimed Addresses
+
 	// Events
 	event Claim(address indexed account, uint256 amount); // (Note: Marking account as indexed allows for easier filtering of these events off-chain.)
 	// Errors
     error MerkleAirdrop_InvalidProof();
+	error MerkleAirdrop_AlreadyClaimed();
 
 	//	address[] claimers;
 	// function claim(address) external {
@@ -33,15 +36,29 @@ contract MerkleAirdrop {
 	}
 
 	function claim(address account, uint256 amount, bytes32[] calldata merkleProof) external {
+		// CHECK 1: Has this account already claimed?
+		if (s_hasClaimed[account]) { // Remmember custom errors are very gas efficient
+			revert MerkleAirdrop_AlreadyClaimed();
+		}
+
+		  // CHECK 2: Is the Merkle proof valid for this account and amount?
 		// calculatine using the account and the amount the hash using the leafe mode
 		// This implementation double-hashes the abi.encoded data.
 		// Consistency between off-chain leaf generation and on-chain verification is paramount, supremly important.
 		bytes32 leaf = keccak256(bytes.concat(keccak256(abi.encode(account, amount))));
+
 		// If MerkleProof.verify returns false (meaning the proof is invalid for the given leaf and root), the if condition (!MerkleProof.verify(...)) becomes true, and the transaction reverts
 		if (!MerkleProof.verify(merkleProof, i_merkleRoot, leaf)) {
 			revert MerkleAirdrop_InvalidProof();
 		}
+
+		// EFFECT: Update state to mark this account as claimed.
+		// CORRECT PLACEMENT - update state BEFORE external call
+    	s_hasClaimed[account] = true; // Updating Claim Status and the Importance of Order (Checks-Effects-Interactions)
+
+		// INTERACTION: Emit event and transfer tokens.
 		emit Claim(account, amount);
 		i_airdropToken.safeTransfer(account, amount);
+
 	}
 }

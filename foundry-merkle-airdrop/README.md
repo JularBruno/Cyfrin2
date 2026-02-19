@@ -83,3 +83,25 @@ tldr: Merkle proof prove data is in merkle tree
 
 ### Base Airdrop Contract
 WE 
+
+### Already Claimed Check
+
+Key Security Concepts and Best Practices Reinforced
+This lesson highlights several crucial concepts for secure smart contract development:
+
+Multiple Claims Vulnerability: A frequent oversight in airdrop or reward distribution contracts. Always ensure that a user cannot claim their entitlement more than once.
+
+State Tracking: Using mapping(address => bool) is a straightforward and gas-efficient method to track whether an address has performed a specific state-changing action.
+
+Reentrancy Attacks: One of the most notorious smart contract vulnerabilities. It occurs when an external call allows an attacker to re-enter the calling function before its initial execution completes critical state changes.
+
+Checks-Effects-Interactions (CEI) Pattern: A vital security design pattern to mitigate reentrancy and other unexpected behaviors.
+
+Checks: Perform all validations (e.g., permissions, input validity, existing state) first.
+
+Effects: Make all internal state changes to your contract.
+
+Interactions: Execute calls to other contracts or transfer value.
+Adhering to this order significantly reduces the attack surface for reentrancy.
+
+Custom Errors: Introduced in Solidity 0.8.4, custom errors (e.g., error MerkleAirdrop_AlreadyClaimed();) provide a more gas-efficient and descriptive way to handle error conditions
