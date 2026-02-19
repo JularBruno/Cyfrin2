@@ -13,13 +13,13 @@ contract GenerateInput is Script {
         types[0] = "address";
         types[1] = "uint";
 
-        uint256 amount = 2500 * 1e18; // Example amount
+        uint256 amount = 25 * 1e18; // Example amount
 
         address[] memory whitelist = new address[](4);
         whitelist[0] = 0x6CA6D1e2D5347bfaB1d91E883F1915560E891290;
         whitelist[1] = 0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B; // Example addresses
         whitelist[2] = 0x1Db3439a222C519ab44bb1144fC28167b4Fa6EE6;
-        whitelist[3] = 0x0e466e7519A469f20168796a0807b758a2339791;
+        whitelist[3] = 0xF7DFAA7B4230fdc795e8C6430834Cf309aF893bA;
 
         string memory json = createJSON(types, whitelist, amount);
         vm.writeFile(FILE_PATH, json);

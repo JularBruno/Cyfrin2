@@ -43,7 +43,7 @@ contract MerkleAirdrop {
 			revert MerkleAirdrop_AlreadyClaimed();
 		}
 
-		  // CHECK 2: Is the Merkle proof valid for this account and amount?
+		// CHECK 2: Is the Merkle proof valid for this account and amount?
 		// calculatine using the account and the amount the hash using the leafe mode
 		// This implementation double-hashes the abi.encoded data.
 		// Consistency between off-chain leaf generation and on-chain verification is paramount, supremly important.
