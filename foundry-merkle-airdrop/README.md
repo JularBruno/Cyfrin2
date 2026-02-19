@@ -105,3 +105,56 @@ Interactions: Execute calls to other contracts or transfer value.
 Adhering to this order significantly reduces the attack surface for reentrancy.
 
 Custom Errors: Introduced in Solidity 0.8.4, custom errors (e.g., error MerkleAirdrop_AlreadyClaimed();) provide a more gas-efficient and descriptive way to handle error conditions
+
+### Merkle Tree Script
+
+##### Understanding Merkle Trees and Proofs for Airdrop Testing
+To effectively test the claim function of our MerkleAirdrop.sol contract, which internally uses MerkleProof.verify from OpenZeppelin, our tests require several key components:
+
+A valid Merkle root: This is the single hash stored in the smart contract that represents the entirety of the airdrop distribution data.
+
+A list of addresses and their corresponding airdrop amounts: This data forms the "leaves" of the Merkle tree.
+
+A Merkle proof for each specific address/amount pair: This proof allows an individual user to demonstrate that their address and amount are part of the Merkle tree, without revealing the entire dataset.
+
+##### Introducing murky for Merkle Tree Generation:
+To generate these Merkle roots and proofs within our Foundry project, we'll utilize the murky library by dmfxyz (available on GitHub: https://github.com/dmfxyz/murky). This library provides tools for constructing Merkle trees and generating proofs directly within Foundry scripts.
+
+Data Structure for Merkle Tree Generation:
+We will use two JSON files to manage the Merkle tree data: input.json for the raw data and output.json for the generated tree information including proofs.
+
+input.json (Raw Airdrop Data):
+This file serves as the input for our Merkle tree generation script. It defines the structure and values for each leaf node.
+
+types: An array specifying the data types for each component of a leaf node (e.g., ["address", "uint"] for an address and its corresponding airdrop amount).
+
+count: The total number of leaf nodes (i.e., airdrop recipients).
+
+values: An object where keys are zero-based indices. Each value is an object representing the components of a leaf. For types ["address", "uint"], the inner object would have keys "0" for the address and "1" for the amount.
+
+output.json (Generated Merkle Tree Data):
+This file will be produced by our script after processing input.json. It contains the complete Merkle tree information, including the root and individual proofs. Each entry in the JSON array corresponds to a leaf.
+
+inputs: The original data for the leaf (e.g., ["address_value", "amount_value"]).
+
+proof: An array of bytes32 hashes representing the Merkle proof required to verify this leaf against the root.
+
+root: The bytes32 Merkle root of the entire tree. This value will be the same for all entries.
+
+leaf: The bytes32 hash of this specific leaf's data.
+
+``` forge install dmfxyz/murky --no-git ```
+
+When you first try to run a script that writes files using vm.writeFile(), you might encounter an error like: "path script/target/input.json is not allowed to be accessed for write operations." To resolve this, you must grant file system permissions in your foundry.toml file. Add the fs_permissions key:
+
+``` forge script script/GenerateInput.s.sol:GenerateInput ```
+
+Logic Overview (Conceptual - actual code can be adapted from murky examples or course repositories):
+Process Each Leaf Entry
+Leaf Hash Calculation
+Generate Merkle Root and Proofs
+Construct and Write output.json
+
+Running the MakeMerkle.s.sol script:
+
+``` forge script script/MakeMerkle.s.sol:MerkleScript ```

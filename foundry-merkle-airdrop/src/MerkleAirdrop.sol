@@ -13,7 +13,9 @@ contract MerkleAirdrop {
     // 1. Manage a list of addresses and corresponding token amounts eligible for the airdrop.
     // 2. Provide a mechanism for eligible users to claim their allocated tokens.
     
-	// State Variables
+	/* 
+	* State Variables 
+	*/
 	bytes32 private immutable i_merkleRoot;
 	IERC20 private immutable i_airdropToken;
 	mapping(address claimant => bool) private s_hasClaimed; //  Declaring a Mapping to Track Claimed Addresses
@@ -24,7 +26,7 @@ contract MerkleAirdrop {
     error MerkleAirdrop_InvalidProof();
 	error MerkleAirdrop_AlreadyClaimed();
 
-	//	address[] claimers;
+	// address[] claimers;
 	// function claim(address) external {
 	// 	for (uint i = 0; i < claimers.length; i++) {
 			// che if the account is in the claiumers
@@ -60,5 +62,16 @@ contract MerkleAirdrop {
 		emit Claim(account, amount);
 		i_airdropToken.safeTransfer(account, amount);
 
+	}
+
+	/**
+	 * GETTER FUNCTIONS
+	 */
+	function getMerkleRoot() external view returns (bytes32) {
+		return i_merkleRoot;
+	}
+
+	function getAirdropToken() external view returns (IERC20) {
+		return i_airdropToken;
 	}
 }
