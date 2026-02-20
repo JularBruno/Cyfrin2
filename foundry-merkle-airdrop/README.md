@@ -200,3 +200,17 @@ This method of using intermediate variables helps avoid potential type conversio
 
 Now, your setUp function will deploy the MerkleAirdrop contract with the correct ROOT that includes your test user.
 
+### Deployment Script
+
+Install foundry-devops (Optional but Recommended for Multi-Chain)
+
+For handling potential differences in deployment mechanisms across chains
+
+``` forge install cyfrin/foundry-devops --no-git ```
+
+The setUp() function in your test file is responsible for initializing the state before each test runs. We'll update it to use our deployment script for standard EVM environments and fall back to manual deployment for ZKsync chains
+
+// Constants previously defined in the test, ensure they align with script values if consistency is desired.
+    // bytes32 ROOT = 0x...; // Should match s_merkleRoot from the script
+    // uint256 AMOUNT_TO_CLAIM = 25 * 1e18;
+    // uint256 AMOUNT_TO_SEND = AMOUNT_TO_CLAIM * 4; // Should match s_amountToTransfer from the script

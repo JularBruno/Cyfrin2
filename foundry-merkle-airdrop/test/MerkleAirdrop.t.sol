@@ -3,9 +3,11 @@ pragma solidity ^0.8.24;
 
 import { Test, console } from "forge-std/Test.sol";
 import { MerkleAirdrop } from "../src/MerkleAirdrop.sol";
+import { DeployMerkleAirdrop } from "../script/DeployMerkleAirdrop.s.sol";
 import { BagelToken } from "../src/BagelToken.sol";
+import { ZkSyncChainChecker } from "lib/foundry-devops/src/ZkSyncChainChecker.sol"; // If using foundry-devops
 
-contract MerkleAirdropTest is Test {
+contract MerkleAirdropTest is ZkSyncChainChecker, Test {
     // State variables
     MerkleAirdrop public airdrop;
     BagelToken public token;
@@ -31,8 +33,20 @@ contract MerkleAirdropTest is Test {
 
     function setUp() public {
         // 1. Deploy the ERC20 Token
-        token = new BagelToken();
-   
+		if (!isZkSyncChain()) { // This check is from ZkSyncChainChecker
+			// Deploy with the script
+			DeployMerkleAirdrop deployer = new DeployMerkleAirdrop();
+			(airdrop, token) = deployer.deployMerkleAirdrop();
+		} else {
+			// Original manual deployment for ZKsync environments (or other specific cases)
+			token = new BagelToken();
+			// Ensure 'ROOT' here is consistent with s_merkleRoot in the script
+			airdrop = new MerkleAirdrop(ROOT, token);
+			// Ensure 'AMOUNT_TO_SEND' here is consistent with s_amountToTransfer in the script
+			token.mint(address(this), AMOUNT_TO_SEND);
+			token.transfer(address(airdrop), AMOUNT_TO_SEND);
+		}
+
         // 2. Generate a Deterministic Test User
         // `makeAddrAndKey` creates a predictable address and private key.
         // This is crucial because we need to know the user's address *before*
@@ -95,8 +109,8 @@ contract MerkleAirdropTest is Test {
    
         // // Convert fixed-size array to dynamic array
         bytes32[] memory proof = new bytes32[](2);
-        proof[0] = 0x2bc7bc0f0e2cc6b4f349fb598317c83fd701f46a2f104f6fdb44af1683572746;
-        proof[1] = 0x056a8946e2bf511ff785ed93b55a36290b27f59371c9d3a025f5ccc29be4a008;
+        proof[0] = PROOF[0];
+        proof[1] = PROOF[1];
 
         // 3. Call the claim function on the airdrop contract
         airdrop.claim(user, AMOUNT_TO_CLAIM, proof);
@@ -119,12 +133,16 @@ contract MerkleAirdropTest is Test {
    
         // Convert fixed-size array to dynamic array
         bytes32[] memory proof = new bytes32[](2);
-        proof[0] = 0x2bc7bc0f0e2cc6b4f349fb598317c83fd701f46a2f104f6fdb44af1683572746;
-        proof[1] = 0x056a8946e2bf511ff785ed93b55a36290b27f59371c9d3a025f5ccc29be4a008;
+        proof[0] = PROOF[0];
+        proof[1] = PROOF[1];
         
         // Call the claim function on the airdrop contract and expect revert
         vm.expectRevert();
-        airdrop.claim(user, AMOUNT_TO_CLAIM, proof);
+        airdrop.claim(userNotIncluded, AMOUNT_TO_CLAIM, proof);
 
+    }
+
+
+    function testClaimReentrancyFails() public {
     }
 }
