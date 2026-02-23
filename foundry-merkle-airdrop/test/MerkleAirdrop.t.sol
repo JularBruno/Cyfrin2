@@ -18,7 +18,7 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
 
     bytes32 public ROOT = 0xd12c51d9bf33a2f5aff9fc1d0651f2ad5b7bca0606c73d597f4db93a2f516093;
     uint256 public AMOUNT_TO_CLAIM = 25 * 1e18; // Example claim amount for the test user
-    uint256 public AMOUNT_TO_SEND; // Total tokens to fund the airdrop contract
+    uint256 public AMOUNT_TO_SEND = AMOUNT_TO_CLAIM * 4; // Total tokens to fund the airdrop contract
 
     // User-specific data
     address user;
@@ -55,22 +55,22 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
    
         // 3. Deploy the MerkleAirdrop Contract
         // Pass the Merkle ROOT and the address of the token contract.
-        airdrop = new MerkleAirdrop(ROOT, token);
+        // airdrop = new MerkleAirdrop(ROOT, token);
    
         // 4. Fund the Airdrop Contract (Critical Step!)
         // The airdrop contract needs tokens to distribute.
         // Let's assume our test airdrop is for 4 users, each claiming AMOUNT_TO_CLAIM.
-        AMOUNT_TO_SEND = AMOUNT_TO_CLAIM * 4;
+        // AMOUNT_TO_SEND = AMOUNT_TO_CLAIM * 4;
    
         // The test contract itself is the owner of the BagelToken by default upon deployment.
-        address owner = address(this); // or token.owner() if explicitly set elsewhere
+        // address owner = address(this); // or token.owner() if explicitly set elsewhere
    
-        // Mint tokens to the owner (the test contract).
-        token.mint(owner, AMOUNT_TO_SEND);
+        // // Mint tokens to the owner (the test contract).
+        // token.mint(owner, AMOUNT_TO_SEND);
    
-        // Transfer the minted tokens to the airdrop contract.
-        // Note the explicit cast of `airdrop` (contract instance) to `address`.
-        token.transfer(address(airdrop), AMOUNT_TO_SEND);
+        // // Transfer the minted tokens to the airdrop contract.
+        // // Note the explicit cast of `airdrop` (contract instance) to `address`.
+        // token.transfer(address(airdrop), AMOUNT_TO_SEND);
 
         // Locate the Merkle proof specific to your user address in output.json. This will be an array of bytes32 hashes.
         proofOne = 0x2bc7bc0f0e2cc6b4f349fb598317c83fd701f46a2f104f6fdb44af1683572746;
@@ -78,7 +78,7 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
         PROOF = [proofOne, proofTwo];
     } // Key Point: A common pitfall is forgetting to fund the airdrop contract. If the MerkleAirdrop contract holds no tokens, claim attempts will naturally fail.
 
-    function testSetup() public {
+    function testSetup() public view {
         console.log(user);
         
         console.logBytes32(airdrop.getMerkleRoot());
@@ -89,7 +89,7 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
 
     }
 
-    function testLeafGeneration() public {
+    function testLeafGeneration() public view{
         bytes32 computedLeaf = keccak256(bytes.concat(keccak256(abi.encode(user, AMOUNT_TO_CLAIM))));
         bytes32 expectedLeaf = 0x5c22b3319c305aa1689a9386137ec820cfb5c1068b6699db995bec4f913b3421;
         
@@ -143,6 +143,6 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
     }
 
 
-    function testClaimReentrancyFails() public {
-    }
+    // function testClaimReentrancyFails() public {
+    // }
 }
