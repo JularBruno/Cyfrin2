@@ -399,3 +399,61 @@ Open the zkSync Sepolia Explorer and paste your zkSync deployment hash.
 zkSync used a specialized Type 113 envelope.
 
 This distinction is not merely cosmetic. Transaction Type 113 allows zkSync to support native features such as Account Abstraction and paymasters directly at the protocol level. 
+
+## Transaction Types
+
+Shared Transaction Types: Ethereum and zkSync
+Ethereum and zkSync share several fundamental transaction types. These form the bedrock of how interactions are structured on both L1 and L2.
+
+- Transaction Type 0 (Legacy Transactions / 0x0)
+Type 0, also known as Legacy Transactions or identified by the prefix 0x0, represents the original transaction format used on Ethereum. This was the standard before the formal introduction of distinct, typed transactions. It embodies the initial method for structuring and processing transactions on the network.
+The --legacy flag highlighted here directly indicates the use of a Type 0 transaction.
+
+- Transaction Type 1 (Optional Access Lists / 0x01 / EIP-2930)
+Transaction Type 1, denoted as 0x01, was introduced by EIP-2930, titled "Optional Access Lists."
+Type 1 transactions maintain the same fields as legacy (Type 0) transactions but introduce a significant addition: an accessList parameter. This parameter is an array containing addresses and storage keys that the transaction plans to access during its execution. The main benefit of including an access list is the potential for gas savings on cross-contract calls.
+
+- Transaction Type 2 (EIP-1559 Transactions / 0x02)
+Transaction Type 2, or 0x02, was introduced by EIP-1559 as part of Ethereum's "London" hard fork. 
+Type 2 transactions include new parameters:
+
+maxPriorityFeePerGas: The maximum tip the sender is willing to pay per unit of gas.
+
+maxFeePerGas: The absolute maximum total fee (baseFee + priorityFee) the sender is willing to pay per unit of gas.
+
+- Transaction Type 3 (Blob Transactions / 0x03 / EIP-4844 / Proto-Danksharding)
+
+This EIP represents an initial, significant step towards scaling Ethereum, particularly for rollups like zkSync. It introduces a new, more cost-effective way for Layer 2 solutions to submit data to Layer 1 via "blobs."
+
+Key features of Type 3 transactions include:
+
+A separate fee market specifically for blob data, distinct from regular transaction gas fees.
+
+Additional fields on top of those found in Type 2 transactions:
+
+max_fee_per_blob_gas: The maximum fee the sender is willing to pay per unit of gas for the blob data.
+
+blob_versioned_hashes: A list of versioned hashes corresponding to the data blobs carried by the transaction.
+
+A crucial aspect of the blob fee mechanism is that this fee is deducted from the sender's account and burned before the transaction itself is executed. This means that if the transaction fails for any reason during execution, the blob fee is non-refundable.
+
+##### zkSync-Specific Transaction Types
+
+- Type 113 (EIP-712 Transactions / 0x71)
+Type 113, or 0x71, transactions on zkSync utilize the EIP-712 standard, "Ethereum typed structured data hashing and signing.
+
+On zkSync, Type 113 transactions are pivotal for accessing advanced, zkSync-specific features such as native Account Abstraction (AA) and Paymasters.
+
+A critical requirement for developers is that smart contracts **must** be deployed on zkSync using a Type 113 (0x71) transaction. 
+
+In addition to standard Ethereum transaction fields, Type 113 transactions on zkSync include several custom fields:
+
+- Type 255 (Priority Transactions / 0xff)
+
+Type 255, or 0xff, transactions on zkSync are known as "Priority Transactions." Their primary purpose is to enable the sending of transactions directly from Ethereum L1 to the zkSync L2 network.
+
+Common use cases include:
+Depositing assets from Ethereum L1 to zkSync L2.
+Triggering L2 smart contract calls or functions from an L1 transaction.
+
+Priority transactions bridge the two layers, ensuring that L1-initiated actions can be reliably processed and reflected on the zkSync rollup.
