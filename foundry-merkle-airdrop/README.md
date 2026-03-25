@@ -457,3 +457,44 @@ Depositing assets from Ethereum L1 to zkSync L2.
 Triggering L2 smart contract calls or functions from an L1 transaction.
 
 Priority transactions bridge the two layers, ensuring that L1-initiated actions can be reliably processed and reflected on the zkSync rollup.
+
+## Blob Transactions
+
+#### EIP-4844: Revolutionizing Layer 2 Scaling with Blob Transactions
+
+This pivotal upgrade brought forth a new transaction type: Blob Transactions (Type 3). The primary objective of these transactions is to drastically lower the costs for Layer 2 (L2) rollups to post their data to the Ethereum Layer 1 (L1) mainnet, ultimately making transactions on L2 solutions significantly cheaper for end-users.
+
+###### Understanding Blob Transactions: The Core Innovation
+
+To appreciate the impact of EIP-4844, it's essential to distinguish between traditional Ethereum transactions and the new blob-carrying transactions:
+
+- Normal Transactions (Type 2 - EIP-1559): In standard Ethereum transactions, all associated data, including input data (known as calldata), is permanently stored on the Ethereum blockchain. Every Ethereum node is required to store this data indefinitely.
+
+- Blob Transactions (Type 3 - EIP-4844): These transactions introduce a novel component: "blobs." Blobs are large, additional chunks of data carried by the transaction. Crucially, this blob data is not stored permanently by the L1 execution layer (the Ethereum Virtual Machine - EVM). Instead, it's guaranteed to be available on the consensus layer for a temporary period—approximately 18 days (or 4096 epochs)—after which it is pruned (deleted) by the nodes. The core transaction details (such as sender, recipient, value, etc.) remain permanently stored on-chain.
+
+**What are Blobs?**
+The term "blob" is a common shorthand for Binary Large Object. In the context of EIP-4844:
+
+Blobs are substantial, fixed-size data packets, each precisely 128 Kilobytes (KiB). This size is composed of 4096 individual fields, each 32 bytes long.
+
+They provide a dedicated and more economical data space for L2 rollups to post their transaction batches, compared to the previously used, more expensive calldata.
+
+##### The Problem Solved: Why Blob Transactions Were Needed
+Ethereum's L1 has historically faced high transaction fees due to its limited block space and substantial demand. This is a direct consequence of the blockchain trilemma, which posits a trade-off between scalability, security, and decentralization.
+
+**The Pre-Blob Bottleneck:**
+Before EIP-4844, rollups posted their compressed transaction batches to L1 using the calldata field of a standard L1 transaction. This approach was a significant cost driver because:
+
+Calldata consumes valuable and limited L1 block space.
+
+This calldata had to be stored permanently by all L1 nodes.
+
+The requirement for permanent storage of large data volumes increases hardware and computational demands on node operators, which directly translates into higher gas fees for all users
+
+##### How EIP-4844 Works: The Mechanics of Blobs
+EIP-4844, or Proto-Danksharding, provides an elegant solution by allowing rollups to post their data as blobs instead of relying solely on calldata.
+
+- Temporary Data Availability: Blobs are designed for short-term data availability. After the defined window (around 18 days), this data is pruned from the consensus layer.
+- A New, Cheaper Data Market: Blobs introduce their own independent fee market, distinct from the gas market for computation and standard calldata
+- Verification Without EVM Access: A cornerstone of EIP-4844's design is that the L1 can verify the availability and integrity of blob data without the EVM needing to directly access or process the contents of the blobs themselves. In fact, the EVM cannot directly access blob data. This efficient verification is achieved through:
+KZG Commitments: For each blob, a KZG (Kate-Zaverucha-Goldberg) commitment is generated. This is a type of polynomial commitment, serving as a small, fixed-size cryptographic proof (akin to a hash) that represents the entire blob.
