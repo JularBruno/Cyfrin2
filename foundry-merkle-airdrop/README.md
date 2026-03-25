@@ -498,3 +498,29 @@ EIP-4844, or Proto-Danksharding, provides an elegant solution by allowing rollup
 - A New, Cheaper Data Market: Blobs introduce their own independent fee market, distinct from the gas market for computation and standard calldata
 - Verification Without EVM Access: A cornerstone of EIP-4844's design is that the L1 can verify the availability and integrity of blob data without the EVM needing to directly access or process the contents of the blobs themselves. In fact, the EVM cannot directly access blob data. This efficient verification is achieved through:
 KZG Commitments: For each blob, a KZG (Kate-Zaverucha-Goldberg) commitment is generated. This is a type of polynomial commitment, serving as a small, fixed-size cryptographic proof (akin to a hash) that represents the entire blob.
+
+## Understanding Type 113 Transactions: An Introduction to Account Abstraction
+
+We are now bridging the gap between our previous discussions on EIP-712 signatures and standard transaction types to introduce one of the most powerful paradigms in Web3: Account Abstraction.
+
+#### What is Account Abstraction?
+At its core, Account Abstraction (AA) is the shift from holding user assets in Externally Owned Accounts (EOAs) to holding them in smart contracts.
+
+In a traditional setup, users utilize standard wallets (like a basic MetaMask account) controlled strictly by a public-private key pair. With Account Abstraction, the goal is to decouple the relationship between the key pair and the account, effectively making user accounts fully programmable smart contracts.
+
+**Ethereum Account Types**
+On the Ethereum mainnet, the network distinguishes between two distinct types of accounts:
+
+Externally Owned Accounts (EOAs):
+
+- These are controlled by a private key.
+- Constraint: A user must initiate and sign every transaction manually.
+- Constraint: They have limited functionality; you cannot program arbitrary logic (rules) directly into an EOA.
+
+Contract Accounts:
+- These are smart contracts deployed to the network.
+- Benefit: They can contain arbitrary logic and code.
+- Constraint: They cannot initiate transactions on their own; they must be triggered by an EOA.
+
+ZKsync Native Account Abstraction
+ZKsync Era fundamentally changes this dynamic by integrating Account Abstraction natively into the protocol.They have the programmable logic of a smart contract but retain the ability to initiate transactions just like an EOA.
