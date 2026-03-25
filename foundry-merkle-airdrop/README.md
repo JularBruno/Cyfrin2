@@ -524,3 +524,20 @@ Contract Accounts:
 
 ZKsync Native Account Abstraction
 ZKsync Era fundamentally changes this dynamic by integrating Account Abstraction natively into the protocol.They have the programmable logic of a smart contract but retain the ability to initiate transactions just like an EOA.
+
+## Implementing EIP-712 Signature Verification for Gasless Airdrop Claims
+
+#### The Off-Chain Signing Process
+With the smart contract ready, the user (or a frontend application acting on their behalf) needs to perform these steps:
+
+Determine Claim Details: Identify the user's account, the amount they are eligible for, and their merkleProof.
+
+Calculate the Digest: The frontend application will call the getMessage(account, amount) view function on your deployed MerkleAirdrop contract (or replicate its exact EIP-712 hashing logic client-side using libraries like ethers.js or viem). This produces the digest to be signed.
+
+Request Signature: The frontend will use a wallet provider (like MetaMask) to request the user to sign this typed data. Wallets that support EIP-712 (e.g., MetaMask via eth_signTypedData_v4) will display the structured AirdropClaim data (account and amount) and the domain information (contract name, version) to the user in a readable format.
+
+User Approves: The user reviews the information and approves the signing request in their wallet. The wallet then returns the signature components: v, r, and s.
+
+Submit to Relayer: The frontend sends the account, amount, merkleProof, and the signature (v, r, s) to a relayer service.
+
+Relayer Executes Claim: The relayer calls the MerkleAirdrop.claim(account, amount, merkleProof, v, r, s) function on the smart contract, paying the gas fee for the transaction.
