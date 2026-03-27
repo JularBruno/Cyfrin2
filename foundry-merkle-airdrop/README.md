@@ -541,3 +541,9 @@ User Approves: The user reviews the information and approves the signing request
 Submit to Relayer: The frontend sends the account, amount, merkleProof, and the signature (v, r, s) to a relayer service.
 
 Relayer Executes Claim: The relayer calls the MerkleAirdrop.claim(account, amount, merkleProof, v, r, s) function on the smart contract, paying the gas fee for the transaction.
+
+## Test On ZKsync (Optional)
+
+foundryup-zksync
+forge build --zksync
+forge test --zksync -vv
