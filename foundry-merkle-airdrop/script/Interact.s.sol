@@ -26,7 +26,9 @@ contract ClaimAirdrop is Script {
         proof[1] = PROOF_TWO;
 ​
         // v, r, s signature components are still needed
-​
+		// v​m.sign(privateKey, digest)
+		// cast wallet sign <MESSAGE_TO_SIGN> --private-key <PRIVATE_KEY>
+		
         vm.startBroadcast();
         // MerkleAirdrop(airdropContractAddress).claim(CLAIMING_ADDRESS, CLAIMING_AMOUNT, proof, v, r, s);
         vm.stopBroadcast();
