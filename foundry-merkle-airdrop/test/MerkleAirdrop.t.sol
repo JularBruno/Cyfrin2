@@ -24,12 +24,14 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
     address user;
     uint256 userPrivKey; // Private key for the test user
 
+	address public gasPayer; 
+
     // Merkle Proof for the test user
     // The structure (e.g., bytes32[2]) depends on your Merkle tree's depth
     // These specific values will be populated from your Merkle tree output
     bytes32 proofOne;
     bytes32 proofTwo;
-    bytes32[2] public PROOF;
+    bytes32[] public PROOF;
 
     function setUp() public {
         // 1. Deploy the ERC20 Token
@@ -52,6 +54,8 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
         // This is crucial because we need to know the user's address *before*
         // generating the Merkle tree that includes them.
         (user, userPrivKey) = makeAddrAndKey("testUser");
+
+		gasPayer = makeAddr("gasPayer"); // Foundry cheatcode to create a distinct test account, gasPayer, which will act as the transaction submitter and pay the gas fees.
    
         // 3. Deploy the MerkleAirdrop Contract
         // Pass the Merkle ROOT and the address of the token contract.
@@ -75,7 +79,9 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
         // Locate the Merkle proof specific to your user address in output.json. This will be an array of bytes32 hashes.
         proofOne = 0x2bc7bc0f0e2cc6b4f349fb598317c83fd701f46a2f104f6fdb44af1683572746;
         proofTwo = 0x056a8946e2bf511ff785ed93b55a36290b27f59371c9d3a025f5ccc29be4a008;
-        PROOF = [proofOne, proofTwo];
+        // PROOF = [proofOne, proofTwo];
+		PROOF.push(proofOne);
+		PROOF.push(proofTwo);
     } // Key Point: A common pitfall is forgetting to fund the airdrop contract. If the MerkleAirdrop contract holds no tokens, claim attempts will naturally fail.
 
     function testSetup() public view {
@@ -98,49 +104,70 @@ contract MerkleAirdropTest is ZkSyncChainChecker, Test {
         
         assert(computedLeaf == expectedLeaf);
     }
-   
-    function testUsersCanClaim() public {
-        // 1. Get the user's starting token balance
-        uint256 startingBalance = token.balanceOf(user);
-   
-        // 2. Simulate the claim transaction from the user's address
-        // `vm.prank(address)` sets `msg.sender` for the *next* external call only.
-        vm.prank(user);
-   
-        // // Convert fixed-size array to dynamic array
-        bytes32[] memory proof = new bytes32[](2);
-        proof[0] = PROOF[0];
-        proof[1] = PROOF[1];
 
-        // 3. Call the claim function on the airdrop contract
-        airdrop.claim(user, AMOUNT_TO_CLAIM, proof);
+	function testUsersCanClaim() public {
+		uint256 startingBalance = token.balanceOf(user);
+		
+		// 1. Get the message digest that the user needs to sign
+		bytes32 digest = airdrop.getMessage(user, AMOUNT_TO_CLAIM);
+		
+		// 2. User signs the digest using their private key
+		uint8 v;
+		bytes32 r;
+		bytes32 s;
+		(v, r, s) = vm.sign(userPrivKey, digest);
+		
+		// 3. The gasPayer calls the claim function with the user's signature
+		vm.prank(gasPayer); // Set the next msg.sender to be gasPayer
+		airdrop.claim(user, AMOUNT_TO_CLAIM, PROOF, v, r, s);
+		
+		uint256 endingBalance = token.balanceOf(user);
+		console.log("Ending Balance: ", endingBalance);
+		assertEq(endingBalance, startingBalance + AMOUNT_TO_CLAIM);
+	}
    
-        // 4. Get the user's ending token balance
-        uint256 endingBalance = token.balanceOf(user);
+    // function testUsersCanClaimOldWithoutGasPayer() public {
+    //     // 1. Get the user's starting token balance
+    //     uint256 startingBalance = token.balanceOf(user);
    
-        // For debugging, you can log the ending balance:
-        console.log("User's Ending Balance: ", endingBalance);
+    //     // 2. Simulate the claim transaction from the user's address
+    //     // `vm.prank(address)` sets `msg.sender` for the *next* external call only.
+    //     vm.prank(user);
    
-        // 5. Assert that the balance increased by the expected claim amount
-        assertEq(endingBalance - startingBalance, AMOUNT_TO_CLAIM, "User did not receive the correct amount of tokens");
-    }
+    //     // // Convert fixed-size array to dynamic array
+    //     bytes32[] memory proof = new bytes32[](2);
+    //     proof[0] = PROOF[0];
+    //     proof[1] = PROOF[1];
 
-    function testUserNotIncludedCannotClaim() public {
-
-        (address userNotIncluded, uint256 userNotIncludedKey) = makeAddrAndKey("testUserNotIncluded");
-
-        vm.prank(userNotIncluded);
+    //     // 3. Call the claim function on the airdrop contract
+    //     airdrop.claim(user, AMOUNT_TO_CLAIM, proof);
    
-        // Convert fixed-size array to dynamic array
-        bytes32[] memory proof = new bytes32[](2);
-        proof[0] = PROOF[0];
-        proof[1] = PROOF[1];
+    //     // 4. Get the user's ending token balance
+    //     uint256 endingBalance = token.balanceOf(user);
+   
+    //     // For debugging, you can log the ending balance:
+    //     console.log("User's Ending Balance: ", endingBalance);
+   
+    //     // 5. Assert that the balance increased by the expected claim amount
+    //     assertEq(endingBalance - startingBalance, AMOUNT_TO_CLAIM, "User did not receive the correct amount of tokens");
+    // }
+
+    // function testUserNotIncludedCannotClaim() public {
+
+    //     (address userNotIncluded, uint256 userNotIncludedKey) = makeAddrAndKey("testUserNotIncluded");
+
+    //     vm.prank(userNotIncluded);
+   
+    //     // Convert fixed-size array to dynamic array
+    //     bytes32[] memory proof = new bytes32[](2);
+    //     proof[0] = PROOF[0];
+    //     proof[1] = PROOF[1];
         
-        // Call the claim function on the airdrop contract and expect revert
-        vm.expectRevert();
-        airdrop.claim(userNotIncluded, AMOUNT_TO_CLAIM, proof);
+    //     // Call the claim function on the airdrop contract and expect revert
+    //     vm.expectRevert();
+    //     airdrop.claim(userNotIncluded, AMOUNT_TO_CLAIM, proof);
 
-    }
+    // }
 
 
     // function testClaimReentrancyFails() public {

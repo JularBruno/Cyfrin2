@@ -12,12 +12,18 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { MerkleProof } from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 contract MerkleAirdrop is EIP712 {
-	using SafeERC20 for IERC20; 
-
+	using SafeERC20 for IERC20;
     // Purpose:
     // 1. Manage a list of addresses and corresponding token amounts eligible for the airdrop.
     // 2. Provide a mechanism for eligible users to claim their allocated tokens.
     
+	/* 
+	* Errors
+	*/
+    error MerkleAirdrop_InvalidProof();
+	error MerkleAirdrop_AlreadyClaimed();
+	error MerkleAirdrop_InvalidSignature();
+
 	/* 
 	* State Variables 
 	*/
@@ -27,9 +33,9 @@ contract MerkleAirdrop is EIP712 {
 	
 	// EIP-712 Typehash for our specific claim structure
     // "AirdropClaim(address account,uint256 amount)"
-    bytes32 private constant MESSAGE_TYPEHASH = 0x810786b83997ad50983567660c1d9050f79500bb7c2470579e75690d45184163;
+	bytes32 private constant MESSAGE_TYPEHASH = keccak256("AirdropClaim(address account,uint256 amount)");
     // It's good practice to pre-compute this hash: keccak256("AirdropClaim(address account,uint256 amount)")
-​
+
     // The struct representing the data to be signed
     struct AirdropClaim {
         address account;
@@ -41,12 +47,6 @@ contract MerkleAirdrop is EIP712 {
 	*/
 	event Claim(address indexed account, uint256 amount); // (Note: Marking account as indexed allows for easier filtering of these events off-chain.)
 	
-	/* 
-	* Errors
-	*/
-    error MerkleAirdrop_InvalidProof();
-	error MerkleAirdrop_AlreadyClaimed();
-	error MerkleAirdrop_InvalidSignature();
 
 	// address[] claimers;
 	// function claim(address) external {
@@ -65,15 +65,14 @@ contract MerkleAirdrop is EIP712 {
 	// Function to compute the EIP-712 digest
     function getMessage(address account, uint256 amount) public view returns (bytes32) {
         // 1. Hash the struct instance according to EIP-712 struct hashing rules
-        bytes32 structHash = keccak256(abi.encode(
-            MESSAGE_TYPEHASH,
-            AirdropClaim({account: account, amount: amount}) // Encode struct explicitly
-        ));
-​
-        // 2. Combine with domain separator using _hashTypedDataV4 from EIP712 contract
+		bytes32 structHash = keccak256(abi.encode(
+			MESSAGE_TYPEHASH,
+			AirdropClaim({account: account, amount: amount})
+		));
+		// 2. Combine with domain separator using _hashTypedDataV4 from EIP712 contract
         // _hashTypedDataV4 constructs the EIP-712 digest:
         // keccak256(abi.encodePacked("\x19\x01", _domainSeparatorV4(), structHash))
-        return _hashTypedDataV4(structHash);
+		return _hashTypedDataV4(structHash);
     }
 
 	function _isValidSignature(
@@ -85,8 +84,8 @@ contract MerkleAirdrop is EIP712 {
 	) internal pure returns (bool) {
 		// Attempt to recover the signer address from the digest and signature components
 		// ECDSA.tryRecover is preferred for security, openzepelin package
-		address actualSigner = ECDSA.tryRecover(digest, v, r, s);
-	​
+		(address actualSigner,,) = ECDSA.tryRecover(digest, v, r, s);
+
 		// Check two things:
 		// 1. Recovery was successful (actualSigner is not the zero address).
 		// 2. The recovered signer matches the expected signer (the 'account' parameter).
@@ -106,14 +105,15 @@ contract MerkleAirdrop is EIP712 {
 			revert MerkleAirdrop_AlreadyClaimed();
 		}
 
-		// Construct the digest the user should have signed
+		// check 2: Construct the digest the user should have signed
 		bytes32 digest = getMessage(account, amount);
+		
 		// Verify the signature
 		if (!_isValidSignature(account, digest, v, r, s)) {
 			revert MerkleAirdrop_InvalidSignature();
 		}
 
-		// CHECK 2: Is the Merkle proof valid for this account and amount?
+		// CHECK 3: Is the Merkle proof valid for this account and amount?
 		// calculatine using the account and the amount the hash using the leafe mode
 		// This implementation double-hashes the abi.encoded data.
 		// Consistency between off-chain leaf generation and on-chain verification is paramount, supremly important.
