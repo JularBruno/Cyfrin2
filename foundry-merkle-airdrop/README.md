@@ -143,11 +143,15 @@ root: The bytes32 Merkle root of the entire tree. This value will be the same fo
 
 leaf: The bytes32 hash of this specific leaf's data.
 
-``` forge install dmfxyz/murky --no-git ```
+```shell
+ forge install dmfxyz/murky --no-git
+```
 
 When you first try to run a script that writes files using vm.writeFile(), you might encounter an error like: "path script/target/input.json is not allowed to be accessed for write operations." To resolve this, you must grant file system permissions in your foundry.toml file. Add the fs_permissions key:
 
-``` forge script script/GenerateInput.s.sol:GenerateInput ```
+```shell
+forge script script/GenerateInput.s.sol:GenerateInput
+```
 
 Logic Overview (Conceptual - actual code can be adapted from murky examples or course repositories):
 Process Each Leaf Entry
@@ -157,7 +161,9 @@ Construct and Write output.json
 
 Running the MakeMerkle.s.sol script:
 
-``` forge script script/MakeMerkle.s.sol:MerkleScript ```
+```shell
+forge script script/MakeMerkle.s.sol:MerkleScript
+```
 
 ### Writing The Tests
 
@@ -206,7 +212,7 @@ Install foundry-devops (Optional but Recommended for Multi-Chain)
 
 For handling potential differences in deployment mechanisms across chains
 
-``` forge install cyfrin/foundry-devops --no-git ```
+```shellforge install cyfrin/foundry-devops --no-git ```
 
 The setUp() function in your test file is responsible for initializing the state before each test runs. We'll update it to use our deployment script for standard EVM environments and fall back to manual deployment for ZKsync chains
 
@@ -544,6 +550,44 @@ Relayer Executes Claim: The relayer calls the MerkleAirdrop.claim(account, amoun
 
 ## Test On ZKsync (Optional)
 
+```shell
 foundryup-zksync
 forge build --zksync
 forge test --zksync -vv
+```
+
+## Creating A Signature
+##### Preparing Your Foundry and Anvil Environment
+
+```shell
+foundryup
+anvil
+make deploy
+```
+
+Compiler run successful!
+Script ran successfully.
+
+== Return ==
+0: contract MerkleAirdrop 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
+1: contract BagelToken 0x5FbDB2315678afecb367f032d93F642f64180aa3
+
+##### Crafting the Data: Generating the Message Hash
+```shell
+cast call 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512 "getMessage(address,uint256)" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 25000000000000000000 --rpc-url http://localhost:8545
+```
+0x39430e4990aa8a1f7d056d9a5f611eb27f8280425efbf03634690a02f26b957a
+
+##### Signing the Message Hash: Authorizing the Claim
+
+```shell
+cast wallet sign --no-hash 0x39430e4990aa8a1f7d056d9a5f611eb27f8280425efbf03634690a02f26b957a --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+```
+
+0x12e145324b60cd4d302bfad59f72946d45ffad8b9fd608e672fd7f02029de7c438cfa0b8251ea803f361522da811406d441df04ee99c3dc7d65f8550e12be2ca1c
+
+##### Deconstructing the Signature: Understanding v, r, and s
+
+// script/interact.s.sol
+To execute this script, you would populate v_sig, r_sig, and s_sig (and the proof array) with the actual values derived from your signature generation process and Merkle tree construction, then run it using forge script.
+
