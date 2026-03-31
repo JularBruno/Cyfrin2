@@ -619,3 +619,58 @@ foundryup -zksync
 chmod +x interactZK.sh
 ./interactZK.sh
 ```
+
+## Deploy And Claim On ZKsync Sepolia (Optional)
+
+```shell
+cast wallet list
+```
+
+ZKSYNC_SEPOLIA_RPC_URL=https://sepolia.era.zksync.dev
+
+```shell
+source .env
+```
+
+```shell
+export TOKEN_ADDRESS=<deployed_token_address>
+
+forge create src/MerkleAirdrop.sol:MerkleAirdrop \
+    --constructor-args <merkle_root_from_output.json> ${TOKEN_ADDRESS} \
+    --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} \
+    --account updraft \
+    --legacy \
+    --zksync
+  	--broadcast
+
+cast call ${AIRDROP_ADDRESS} "getMessageHash(address,uint256)" \
+    <address_of_updraft-2_from_input.json> \
+    <claim_amount_from_input.json> \
+    --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL}
+
+cast send ${TOKEN_ADDRESS} "mint(address,uint256)" \
+    <my_metamask_address_for_updraft> \
+    <total_airdrop_supply> \
+    --account updraft \
+    --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} \
+    --legacy --zksync
+
+cast send ${TOKEN_ADDRESS} "transfer(address,uint256)" \
+    ${AIRDROP_ADDRESS} \
+    <total_airdrop_supply> \
+    --account updraft \
+    --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} \
+    --legacy --zksync
+
+cast send ${AIRDROP_ADDRESS} \
+    "claim(address,uint256,bytes32[],uint8,bytes32,bytes32)" \
+    <address_of_updraft-2> \
+    <claim_amount> \
+    "[<proof_element_1_for_updraft-2>,<proof_element_2_for_updraft-2>,...]" \
+    ${V_VAL} \
+    ${R_VAL} \
+    ${S_VAL} \
+    --account updraft \
+    --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} \
+    --legacy --zksync
+```
