@@ -23,7 +23,6 @@ contract MerkleAirdrop is EIP712 {
     error MerkleAirdrop_InvalidProof();
 	error MerkleAirdrop_AlreadyClaimed();
 	error MerkleAirdrop_InvalidSignature();
-	error __MyScriptName_InvalidSignatureLength(); // Use a script-specific name
 
 
 	/* 
@@ -136,39 +135,6 @@ contract MerkleAirdrop is EIP712 {
 
 	}
 
-	/**
-	 * @notice Splits a 65-byte concatenated signature (r, s, v) into its components.
-	 * @param sig The concatenated signature as bytes.
-	 * @return v The recovery identifier (1 byte).
-	 * @return r The r value of the signature (32 bytes).
-	 * @return s The s value of the signature (32 bytes).
-	 */
-	function splitSignature(bytes memory sig)
-		public
-		pure
-		returns (uint8 v, bytes32 r, bytes32 s)
-	{
-		// Standard ECDSA signatures are 65 bytes:
-		// r (32) + s (32) + v (1)
-		if (sig.length != 65) {
-			revert __MyScriptName_InvalidSignatureLength();
-		}
-
-		assembly {
-			// r = first 32 bytes
-			r := mload(add(sig, 0x20))
-
-			// s = next 32 bytes
-			s := mload(add(sig, 0x40))
-
-			// v = first byte of next 32 bytes
-			v := byte(0, mload(add(sig, 0x60)))
-			
-			// EIP-155: With EIP-155 (transaction replay protection on different chains), v values became chain-specific: chain_id * 2 + 35 or chain_id * 2 + 36.
-			// if (v < 27) v += 27;
-
-		}
-	}
 
 	/**
 	 * GETTER FUNCTIONS

@@ -591,3 +591,23 @@ cast wallet sign --no-hash 0x39430e4990aa8a1f7d056d9a5f611eb27f8280425efbf036346
 // script/interact.s.sol
 To execute this script, you would populate v_sig, r_sig, and s_sig (and the proof array) with the actual values derived from your signature generation process and Merkle tree construction, then run it using forge script.
 
+
+## Executing The Anvil Script
+
+```shell
+forge script script/Interact.s.sol:ClaimAirdrop --rpc-url http://localhost:8545 --private-key <ANVIL_PRIVATE_KEY_FOR_GAS_PAYER> --broadcast
+```
+1. Obtain the Token Contract Address:
+2. Query Token Balance using cast call:
+
+```shell
+cast call 0x5FbDB2315678afecb367f032d93F642f64180aa3 "balanceOf(address)" 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+This command will output the balance in hexadecimal format:
+0x000000000000000000000000000000000000000000000000000000015af1d78b58c40000
+
+```shell
+
+cast --to-dec 0x000000000000000000000000000000000000000000000000000000015af1d78b58c40000
+```
