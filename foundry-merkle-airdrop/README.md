@@ -611,3 +611,11 @@ This command will output the balance in hexadecimal format:
 
 cast --to-dec 0x000000000000000000000000000000000000000000000000000000015af1d78b58c40000
 ```
+
+## Deploy And Claim On ZKsync Local Node (Optional)
+
+```shell
+foundryup -zksync
+chmod +x interactZK.sh
+./interactZK.sh
+```

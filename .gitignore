@@ -1,6 +1,7 @@
 # Global ignore for all subfolders
 **/cache/
 **/out/
+**/zkout/
 **/lib/
 **/.env
 **/docs/
