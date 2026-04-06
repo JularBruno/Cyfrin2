@@ -107,3 +107,32 @@ To mitigate these risks, several standardized proxy patterns have emerged.
 
 **A Final Word of Caution**
 Upgradeable smart contracts are a powerful tool, but they should not be the default choice. They introduce centralization, as a privileged address must be able to authorize upgrades. They also add significant complexity and new attack surfaces. The primary goal of web3 development should always be to progress towards decentralized, immutable systems. 
+
+## Overview of the EIP-1967
+
+##### EIP-1967 Proxy
+This SmallProxy example contains a lot of Yul. Yul is a sort of in-line Assembly that allows you to write really low-level code. Like anything low-level it comes with increased risk and severity of mistakes, it's good to avoid using Yul as often as you can justify.
+
+The need to regularly utilize storage to reference things in implementation (specifically the implementation address) led to the desire for EIP-1967: Standard Proxy Storage Slots. This proposal would allocate standardized slots in storage specifically for use by proxies.
+
+**SmallProxy.sol deployed on Remix**
+By passing an argument to getDataToTransact we're provided the encoded call data necessary to set our valueAtStorageSlotZero to 777. Remember, sending a transaction to our proxy with this call data should update the storage in the proxy.
+
+
+Then the flow in Remix:
+
+Deploy ImplementationA → copy address
+Deploy SmallProxy
+Call setImplementation on SmallProxy with ImplementationA's address
+Call getDataToTransact(777) on SmallProxy → copy the bytes output
+Paste that bytes into the low-level calldata box at the bottom of SmallProxy → hit Transact
+Call readStorage → should return 777
+
+Next, deploy ImplementationB and then call setImplementation on SmallProxy, passing this new implementation address.
+valueAtStorageSlotZero now reflects the new implementation logic of newValue + 2!
+
+**This kind of power should also give you pause and make you consider the effects of trusting this degree of centrality to the protocol developers.**
+
+Selector Clashes
+One quick final note on function selector clashes which I'd mentioned earlier. In our example here, SmallProxy.sol only really has one function setImplementation, but if the implementation contract also had a function called setImplementation, it would be easy to see how this conflict could occur. 
+
