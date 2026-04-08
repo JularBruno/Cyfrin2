@@ -136,3 +136,22 @@ valueAtStorageSlotZero now reflects the new implementation logic of newValue + 2
 Selector Clashes
 One quick final note on function selector clashes which I'd mentioned earlier. In our example here, SmallProxy.sol only really has one function setImplementation, but if the implementation contract also had a function called setImplementation, it would be easy to see how this conflict could occur. 
 
+## Using delegateCall
+
+Contract B is very simple, it contains 3 storage variables which are set by the setVars function.
+
+If we recall, storage acts kind of like an array and each storage variable is sequentially assigned a slot in storage, in the order in which the variable is declared in a contract.
+
+In contract A we're doing much the same thing, the biggest different of course being that we're using delegateCall.
+
+This works fundamentally similar to call. In the case of call we would be calling the setVars function on Contract B and this would update the storage on Contract B, as you would expect.
+
+With delegateCall however, we're borrowing the logic from Contract B and referencing the storage of Contract A. This is entirely independent of what the variables are actually named.
+
+Importantly, this behaviour, due to referencing storage slots directly, is independent of any naming conventions used for the variables themselves. In fact, if Contract A didn't have any of it's own declared variables at all, the appropriate storage slots would still be updated!
+
+What if we changed the variable type of number in Contract A to a bool? If we then call delegateCall on Contract B, we'll see it's set our storage slot to true. The bool type detects our input as true, with 0 being the only acceptable input for false.
+
+
+
+
