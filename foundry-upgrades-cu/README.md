@@ -152,6 +152,18 @@ Importantly, this behaviour, due to referencing storage slots directly, is indep
 
 What if we changed the variable type of number in Contract A to a bool? If we then call delegateCall on Contract B, we'll see it's set our storage slot to true. The bool type detects our input as true, with 0 being the only acceptable input for false.
 
+## OpenZeppelin UUPS Proxies
 
+Abstract contracts have some of their functions defined, and others undefined. These contracts expect their child classes to implement the undefined functions.
 
+/*
+ * @dev This empty reserved space is put in place to allow future versions to add new variables without shifting down storage in the inheritance chain.
+ * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+ */
+uint256[50] private __gap;
 
+If you recall to previous lessons, when values are assigned by a function, the variable name doesn't ultimately matter as the value is assigned to a storage slot. We saw that storage clashes were possible when an upgraded implementation contract made changes to the order of storage variable assignments, leading to some funky behaviours.
+
+Storage gaps are an effort to get ahead of this problem by pre-allocating an array of slots to account for future protocol changes.
+
+Since proxied contracts do not make use of a constructor, its common to move constructor logic to an external initializer function, usually called initialize.
