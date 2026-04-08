@@ -14,7 +14,7 @@ contract BoxV2 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
     }
 
     function initialize() public initializer {
-        __Ownable_init(msg.sender);
+        __Ownable_init();
         __UUPSUpgradeable_init();
     }
 
