@@ -58,3 +58,6 @@
 [submodule "foundry-cross-chain-rebase-token-cu/lib/chainlink-local"]
 	path = foundry-cross-chain-rebase-token-cu/lib/chainlink-local
 	url = https://github.com/smartcontractkit/chainlink-local
+[submodule "lib/foundry-devops"]
+	path = lib/foundry-devops
+	url = https://github.com/Cyfrin/foundry-devops

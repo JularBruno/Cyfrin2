@@ -167,3 +167,8 @@ If you recall to previous lessons, when values are assigned by a function, the v
 Storage gaps are an effort to get ahead of this problem by pre-allocating an array of slots to account for future protocol changes.
 
 Since proxied contracts do not make use of a constructor, its common to move constructor logic to an external initializer function, usually called initialize.
+
+## Upgrade UUPS Proxy Smart Contracts
+
+We're unable to call a function on an address provided as a parameter here, but by wrapping the address in BoxV1 (which needs to be imported), we provide our function the ABI necessary to reference the upgradeTo function within the proxy address.
+
